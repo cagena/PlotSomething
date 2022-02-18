@@ -26,7 +26,7 @@ the ME405 Tub.
 |  2   | Motor Mount Parts     | Innovation Sandbox    |     -     |
 |  1   | Pen Carrier           | Innovation Sandbox    |     -     |
 |  1   | Support Wheel         | Innovation Sandbox    |     -     |
-|  1   | Driving Wheel         | Amazon                |           |
+|  1   | Driving Wheel         | Amazon                |     $     |
 
 ## Scaled Sketch of Proposed System
 
