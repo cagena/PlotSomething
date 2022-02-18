@@ -18,15 +18,19 @@ the ME405 Tub.
 
 ## Bill of Materials
 
-| Qty. | Part                  | Source                | Est. Cost |
-|:----:|:----------------------|:----------------------|:---------:|
-|  2   | Pittperson Gearmotors | ME405 Tub             |     -     |
-|  1   | Nucleo with Shoe      | ME405 Tub             |     -     |
-|  1   | Black  Sharpie&trade; | Home                  |     -     |
-|  2   | Motor Mount Parts     | Innovation Sandbox    |     -     |
-|  1   | Pen Carrier           | Innovation Sandbox    |     -     |
-|  1   | Support Wheel         | Innovation Sandbox    |     -     |
-|  1   | Driving Wheel         | Amazon                |     $     |
+| Qty. | Part                     | Source                | Est. Cost |
+|:----:|:-------------------------|:----------------------|:---------:|
+|  2   | Pittperson Gearmotors    | ME405 Tub             |     -     |
+|  1   | Nucleo with Shoe         | ME405 Tub             |     -     |
+|  1   | Black  Sharpie&trade;    | Home                  |     -     |
+|  2   | Motor Mount Parts        | Innovation Sandbox    |     -     |
+|  1   | Pen Carrier              | Innovation Sandbox    |     -     |
+|  1   | Support Wheel            | Innovation Sandbox    |     -     |
+|  1   | V-Slot Framing Extrusion | Innovation Sandbox    |     -     |
+|  1   | Solenoid                 | Digikey               |   $4.95   |
+|  1   | Track Roller Bearings    | Amazon                |   $10.99  |
+|  1   | Driving Wheel            | Amazon                |     $     |
+|  1   | Drive Shaft              | Amazon                |     $     |
 
 ## Scaled Sketch of Proposed System
 
