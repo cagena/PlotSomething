@@ -27,7 +27,6 @@ the ME405 Tub.
 |  1   | Pen Carrier              | Innovation Sandbox    |     -     |
 |  1   | Support Wheel            | Innovation Sandbox    |     -     |
 |  1   | V-Slot Framing Extrusion | Innovation Sandbox    |     -     |
-|  1   | Acrylic Plate            | A nice friend (:      |   $4.95   |
 |  1   | Solenoid                 | Digikey               |   $4.95   |
 |  1   | Track Roller Bearings    | Amazon                |   $10.99  |
 |  1   | Driving Wheel            | Amazon                |     $     |
