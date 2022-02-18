@@ -25,9 +25,8 @@ the ME405 Tub. *** NOTE: The solenoid is not pictured in the CAD assembly below,
 |  2   | Motor Mount Parts        | Innovation Sandbox    |     -     |
 |  1   | Pen Carrier              | Innovation Sandbox    |     -     |
 |  1   | Support Wheel            | Innovation Sandbox    |     -     |
-|  1   | V-Slot Framing Extrusion | Innovation Sandbox    |     -     |
+|  1   | T-Slot Framing Extrusion | Home Depot            |   $13.71  |
 |  1   | Solenoid                 | Digikey               |   $4.95   |
-|  1   | Track Roller Bearings    | Amazon                |   $10.99  |
 |  1   | Driving Wheel            | Amazon                |     $     |
 |  1   | Drive Shaft              | Amazon                |     $     |
 
