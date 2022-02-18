@@ -44,7 +44,7 @@ We are considering manufacturing these parts in the machine shops.
 ## Scaled Sketches of Proposed System
 
 ![alt text](Fixture_1.png)
-Figure 1. Isometric View Front
+Figure 1. Isometric Front View
 
 ![alt text](Fixture_2.png)
-Figure 2. Isometric View Back
+Figure 2. Isometric Back View
