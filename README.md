@@ -29,11 +29,14 @@ the ME405 Tub. *** NOTE: The solenoid is not pictured in the CAD assembly below,
 |  1   | Solenoid                 | Digikey               |   $4.95   |
 |  1   | Driving Wheel            | ?                     |     ?     |
 |  1   | Drive Shaft              | ?                     |     ?     |
+|  2   | Drive Shaft Coupling     | ?                     |     ?     |
 |  1   | Lead Screw               | ?                     |     ?     |
 |  2   | Bearings                 | ?                     |     ?     |
 
-## Scaled Sketch of Proposed System
+## Scaled Sketches of Proposed System
 
 ![alt text](Fixture_1.png)
+Figure 1
 
 ![alt text](Fixture_2.png)
+Figure 2
