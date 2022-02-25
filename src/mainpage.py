@@ -6,7 +6,7 @@ File that holds the main page.
 The term project is to design and build a 2.5 axis pen plotter.
 
 @section software Software Design
-Throughout the quarter software was developed for motion control, multitasking, and program organization.
+Throughout the quarter, software was developed for motion control, multitasking, and program organization.
 The software was designed conceptually in the form of a task diagram and multiple finite state machine diagrams.
 
 @subsection task Task Diagram
