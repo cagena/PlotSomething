@@ -16,6 +16,7 @@ import controller_agena_chiu
 import utime
 import print_task
 import task_user
+
 # from pyb import USB_VCP
 # from nb_input import NB_Input
 # 
@@ -97,9 +98,7 @@ if __name__ == "__main__":
     # Enable both motors.
     motor_drv1.enable()
     motor_drv2.enable()
-    
-    user_drv = task_user.Task_User
-
+  
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
     gc.collect ()
@@ -128,10 +127,10 @@ if __name__ == "__main__":
                          period = 10, profile = True, trace = False)
     task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 2, 
                          period = 10, profile = True, trace = False)
-    in_task = cotask.Task (user_drv.input_task, name = 'Input Task', priority = 1, 
+    in_task = cotask.Task (task_user.input_task, name = 'Input Task', priority = 1, 
                            period = 50, profile = True, trace = False)
-    task_user = cotask.Task (user_drv.task_user, name = 'User Task', priority = 0, 
-                            period = 100, profile = True, trace = False)
+    task_user = cotask.Task (task_user.task_user, name = 'User Task', priority = 0, 
+                           period = 100, profile = True, trace = False)
     cotask.task_list.append (task1)
     cotask.task_list.append (task2)
     cotask.task_list.append (in_task)
