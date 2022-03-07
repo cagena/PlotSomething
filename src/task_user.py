@@ -17,6 +17,8 @@ S0_CALIB            = const(0)
 S1_HELP             = const(1)
 ## State 2 of the user interface task
 S2_WAIT_FOR_CHAR    = const(2)
+## State 3 of the user interface task
+S3_PLOT             = const(3)
 
 nb_in = NB_Input (USB_VCP(), echo=True)
 
@@ -37,9 +39,9 @@ def task_user(state = S0_CALIB):
             print('\n\rWelcome, press:'
                   '\n\'p\' to plot from a HPGL file'
                   '\n\'d\' to set the both motors to a duty cycle of 0'
-                  '\n\'m\' to prompt the user to enter a setpoint for'
+                  '\n\'l\' to prompt the user to enter a setpoint for'
                   ' lead screw'
-                  '\n\'M\' to prompt the user to enter a setpoint for'
+                  '\n\'a\' to prompt the user to enter a setpoint for'
                   ' the wheel'
                   '\n\'q\' to quit'
                   '\n\'h\' return to the welcome screen')
@@ -47,11 +49,73 @@ def task_user(state = S0_CALIB):
             
         elif state == S2_WAIT_FOR_CHAR:
             if nb_in.any ():
-                if nb_in.get() == 'q':
+                char_in = nb_in.get()
+                if char_in == 'q':
                     print('\r\nThe program was exited')
-                elif nb_in.get() == 'h':
+                elif char_in == 'h':
                     state = S1_HELP
                     print('\r\n')
-                elif nb_in.get() == 'm':
+                elif char_in == 'l':
                     print('\r\nLinear position set')
+                elif char_in == 'a':
+                    print('\r\nAngular position set')
+                elif char_in == 'm' or char_in == 'M':
+                    print('\r\nPosition set')
+                elif char_in == 'p' or char_in == 'P':
+                    state = S3_PLOT
+                    i = 0
+        
+        elif state == S3_PLOT:
+            if i == 0:
+                print('\r\nEnter hpgl file name:')
+            elif nb_in.any ():
+                filename = nb_in.get()
+                print('\r\n',filename)
+                if '.hpgl' in filename or '.HPGL' in filename:
+                    # Open the serial port to read from it and plot.
+                    with open(filename) as f:
+                        while True:
+                            ## A variable that reads lines of code from the Nucleo.
+                            raw_data = f.readlines()
+                            ## A variable that separates strings into ordered lists of data.
+                            #data = raw_data.split(';')
+                            print(raw_data[0])
+#                             try:
+#                                 float(data[0])
+#                                 float(data[1])
+#                             except:
+#                                 if len(data) >= 2:
+#                                     if data[0].strip() == ' ' or data[1].strip() == ' ':
+#                                         continue
+#                                     elif data[0].strip().isalpha() == True or data[1].strip().isalpha() == True:
+#                                         continue             
+#                                 elif 'MicroPython' in data[0]:
+#                                     break
+#                             else:
+#                                 x_val.append(float(data[0].strip()))
+#                                 y_val.append(float(data[1].strip()))
+                else:
+                    print('\r\ninvalid file name')
+            i += 1
+
         yield 0
+
+if __name__ == "__main__":
+    import cotask
+
+    print ("\033[2JTesting Non-Blocking Input Class")
+    in_task = cotask.Task (input_task, name = 'Input Task', priority = 1, 
+                           period = 50, profile = True, trace = False)
+    task_user = cotask.Task (task_user, name = 'User Task', priority = 2, 
+                            period = 500, profile = True, trace = False)
+    cotask.task_list.append (in_task)
+    cotask.task_list.append (task_user)
+
+    while True:
+        try:
+            cotask.task_list.pri_sched ()
+        except KeyboardInterrupt:
+            break
+
+    print ('\n' + str (cotask.task_list))
+    ## @endcond
