@@ -60,8 +60,8 @@ with open(filename) as f:
                 operation.append(x)
                         
     #print(data)
-    for i in range(20):
-        print(operation[i])
+    for i in operation:
+        print(i)
     # try:
     #     float(data[0])
     #     float(data[1])

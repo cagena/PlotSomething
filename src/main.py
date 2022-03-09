@@ -48,7 +48,7 @@ def task_motor1():
         current = utime.ticks_ms()
         difference = (current - start)
         ## A variable that defines duty cycle for the controller's run function.
-        duty_cycle = controller_1.run(encoder_drv1.read())
+        duty_cycle = controller_1.run(encoder_drv1.read(), 100)
         motor_drv1.set_duty_cycle(duty_cycle)
 
 #         if difference <= 1500:
@@ -70,7 +70,7 @@ def task_motor2():
         current = utime.ticks_ms()
         difference = (current - start)
         ## A variable that defines duty cycle for the controller's run function.
-        duty_cycle = controller_2.run(encoder_drv2.read())
+        duty_cycle = controller_2.run(encoder_drv2.read(),100)
         motor_drv2.set_duty_cycle(duty_cycle)
         if difference >= 1500:
             motor_drv2.disable()

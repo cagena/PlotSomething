@@ -26,7 +26,7 @@ class ControllerDriver:
         ## Initial setpoint
         self.i_set = float(i_set)
         
-    def run(self,pos):
+    def run(self,pos,max_duty):
         '''!
         Called repeatedly to run the control algorithm.
         @param pos Current position of the encoder.
@@ -41,10 +41,10 @@ class ControllerDriver:
             error = 0
         ## Actuation signal or percent duty cycle to set the motor.
         duty = error*self.K_p
-        if duty > 100:
-            duty = 100
-        elif duty < -100:
-            duty = -100
+        if duty > max_duty:
+            duty = max_duty
+        elif duty < -max_duty:
+            duty = -max_duty
         return duty
         
     def set_setpoint(self,setpoint):
