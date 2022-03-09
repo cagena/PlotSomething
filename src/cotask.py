@@ -12,20 +12,8 @@ chosen scheduling algorithm such as round-robin or highest-priority-first.
 @author JR Ridgely
 @date   2017-Jan-01 JRR Approximate date of creation of file
 @date   2021-Dec-18 JRR Docstrings modified to work without DoxyPyPy
-@copyright This program is copyright (c) 2017-2022 by JR Ridgely and released
-           under the GNU Public License, version 3.0.
-
-It is intended for educational use only, but its use is not limited thereto.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@copyright This program is copyright (c) 2017-2021 by JR Ridgely and released
+           under the GNU Public License, version 3.0. 
 """
 
 import gc                              # Memory allocation garbage collector
@@ -217,19 +205,6 @@ class Task:
 
         # If the task doesn't use a timer, we rely on go_flag to signal ready
         return self.go_flag
-
-
-    def set_period (self, new_period):
-        """!
-        This method sets the period between runs of the task to the given
-        number of milliseconds, or @c None if the task is triggered by calls
-        to @c go() rather than time.
-        @param new_period The new period in milliseconds between task runs
-        """
-        if new_period is None:
-            self.period = None
-        else:
-            self.period = int (new_period) * 1000
 
 
     def reset_profile (self):

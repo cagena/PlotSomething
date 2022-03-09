@@ -13,9 +13,27 @@ import cotask
 import encoder_agena_chiu
 import motor_agena_chiu
 import controller_agena_chiu
-import utime
-import print_task
-import task_user
+import task_share
+from pyb import USB_VCP
+from nb_input import NB_Input
+from micropython import const
+import hpgl_agena_chiu
+import math
+
+## State 0 of the user interface task
+S0_CALIB            = const(0)
+## State 1 of the user interface task
+S1_HELP             = const(1)
+## State 2 of the user interface task
+S2_WAIT_FOR_CHAR    = const(2)
+## State 3 of the user interface task
+S3_READ             = const(3)
+## State 4 of the user interface task
+S4_PLOT             = const(4)
+
+nb_in = NB_Input (USB_VCP(), echo=True)
+
+op_queue = task_share.Queue('B', 1500, name = 'Operation Share')
 
 # from pyb import USB_VCP
 # from nb_input import NB_Input
@@ -35,22 +53,24 @@ import task_user
 #             if nb_in.get() == 'q':
 #                 print('\r\nThe program was exited')
 #         yield 0
+    
 
 def task_motor1():
     ## The variable that calculates change in time.
-    difference = 0
+    #difference = 0
     ## The variable that marks the start of the timer.
-    start = utime.ticks_ms()
+    #start = utime.ticks_ms()
     ## The variable that indicates if the current run is the initial run of the loop.
-    runs1 = 0
+    #runs1 = 0
     while True:
         ## A variable that creates a timer which marks the current time.
-        current = utime.ticks_ms()
-        difference = (current - start)
+        #current = utime.ticks_ms()
+        #difference = (current - start)
         ## A variable that defines duty cycle for the controller's run function.
         duty_cycle = controller_1.run(encoder_drv1.read(), 100)
         motor_drv1.set_duty_cycle(duty_cycle)
-
+        if encoder_drv1.read() >= ang_set.get() - 100 and encoder_drv1.read() <= ang_set.get() + 100:
+            move_flag1.put(1)
 #         if difference <= 1500:
 #             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
 #         else:
@@ -62,22 +82,112 @@ def task_motor1():
 
 def task_motor2():
     ## The variable that calculates change in time.
-    difference = 0
+    # difference = 0
     ## The variable that marks the start of the timer.
-    start = utime.ticks_ms()
+    # start = utime.ticks_ms()
     while True:
         ## A variable that creates a timer which marks the current time.
-        current = utime.ticks_ms()
-        difference = (current - start)
+        # current = utime.ticks_ms()
+        # difference = (current - start)
         ## A variable that defines duty cycle for the controller's run function.
         duty_cycle = controller_2.run(encoder_drv2.read(),100)
         motor_drv2.set_duty_cycle(duty_cycle)
-        if difference >= 1500:
-            motor_drv2.disable()
+        if encoder_drv2.read() >= ang_set.get() - 100 and encoder_drv2.read() <= ang_set.get() + 100:
+            move_flag2.put(1)
+        # if difference >= 1500:
+        #     motor_drv2.disable()
         # The print portion is commented out for the second motor.
             # if difference <= 1500:
             # print_task.put('{:},{:}\r\n'.format(difference,encoder_drv2.read()))
         yield()
+        
+def input_task():
+        """!  Task which runs the non-blocking input object quickly to ensure
+        that keypresses are handled not long after they've occurred. """
+        while True:
+            nb_in.check ()
+            yield 0
+
+def task_user(state = S0_CALIB):
+     while True:
+        if state == S0_CALIB:
+            print('Ready to Calibrate? Press Enter')
+            if nb_in.any ():
+                char_in = nb_in.get()
+                if char_in == '\r' or char_in == '\n':
+                    continue
+            pin = pyb.Pin(pyb.Pin.cpu.A0, pyb.Pin.IN)
+            adc = pyb.ADC(pin)
+            motor_drv1.set_duty_cycle(-100)
+            while True:
+                val = adc.read()
+                if val <= 5:
+                    motor_drv1.set_duty_cycle(0)
+                    break
+            state = S1_HELP
+            
+        elif state == S1_HELP:
+            print('\n\rWelcome, press:'
+                  '\n\'p\' to plot from a HPGL file'
+                  '\n\'d\' to set the both motors to a duty cycle of 0'
+                  '\n\'l\' to prompt the user to enter a setpoint for'
+                  ' lead screw'
+                  '\n\'a\' to prompt the user to enter a setpoint for'
+                  ' the wheel'
+                  '\n\'q\' to quit'
+                  '\n\'h\' return to the welcome screen')
+            state = S2_WAIT_FOR_CHAR
+            
+        elif state == S2_WAIT_FOR_CHAR:
+            if nb_in.any ():
+                char_in = nb_in.get()
+                if char_in == 'q':
+                    print('\r\nThe program was exited')
+                elif char_in == 'h':
+                    state = S1_HELP
+                    print('\r\n')
+                elif char_in == 'l':
+                    print('\r\nLinear position set')
+                elif char_in == 'a':
+                    print('\r\nAngular position set')
+                elif char_in == 'm' or char_in == 'M':
+                    print('\r\nPosition set')
+                elif char_in == 'p' or char_in == 'P':
+                    state = S3_READ
+                    i = 0
+        
+        elif state == S3_READ:
+            if i == 0:
+                print('\r\nEnter hpgl file name:')
+            elif nb_in.any ():
+                filename = nb_in.get()
+                print('\r\n',filename)
+                if '.hpgl' in filename or '.HPGL' in filename:
+                    hpgl = hpgl_agena_chiu(filename)
+                    hpgl.read()
+                else:
+                    print('\r\ninvalid file name')
+            i += 1
+            state = S4_PLOT
+        
+        elif state == S4_PLOT:
+            move_flag1.put(0)
+            move_flag2.put(0)
+            for i in hpgl.length():
+                hpgl.run(i)
+                x = hpgl.report_x()
+                y = hpgl.report_y()
+                x_scaled = (x/1016) - 3
+                y_scaled = (y/1016) + 5.59
+                r = math.sqrt(x_scaled^2 + y_scaled^2)
+                duty1 = (r*16384)/0.04167
+                duty2 = (16384*20.27*math.cosa(x_scaled*r))/2
+                lin_set.put(duty1)
+                ang_set.put(duty2)
+                if move_flag1 == 1 and move_flag2 == 1:
+                    continue
+        
+        yield 0
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
@@ -98,7 +208,13 @@ if __name__ == "__main__":
     # Enable both motors.
     motor_drv1.enable()
     motor_drv2.enable()
-  
+    
+    lin_set = task_share.Share('h', name = 'Linear Setpoint')
+    ang_set = task_share.Share('h', name = 'Angular Setpoint')
+    
+    move_flag1 = task_share.Share('B', name = 'Movement Flag 1')
+    move_flag2 = task_share.Share('B', name = 'Movement Flag 2')
+    
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
     gc.collect ()
@@ -127,9 +243,9 @@ if __name__ == "__main__":
                          period = 10, profile = True, trace = False)
     task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 2, 
                          period = 10, profile = True, trace = False)
-    in_task = cotask.Task (task_user.input_task, name = 'Input Task', priority = 1, 
+    in_task = cotask.Task (input_task, name = 'Input Task', priority = 1, 
                            period = 50, profile = True, trace = False)
-    task_user = cotask.Task (task_user.task_user, name = 'User Task', priority = 0, 
+    task_user = cotask.Task (task_user, name = 'User Task', priority = 0, 
                            period = 100, profile = True, trace = False)
     cotask.task_list.append (task1)
     cotask.task_list.append (task2)

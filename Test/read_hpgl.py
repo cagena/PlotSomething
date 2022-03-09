@@ -1,13 +1,8 @@
-import cqueue
-import task_share
-QUEUE_SIZE = 100000
-op_queue = cqueue.ByteQueue(QUEUE_SIZE)
 
 filename = 'test_file.hpgl'
 operation = []
 raw_st = ''
 st = ''
-test_str = ''
 cu = 0
 cd = 0
 with open(filename) as f:
@@ -22,9 +17,8 @@ with open(filename) as f:
             float(x)
         except:
             if 'PU' in x:
-                op_queue.put('PU')
+                operation.append('PU')
                 raw_st = x
-                l = len(x)
                 for y in raw_st:
                     try:
                         float(y)
@@ -33,18 +27,17 @@ with open(filename) as f:
                             st += ','
                             cu = 1
                         elif y == ',' and cu == 1:
-                            op_queue.put(st)
+                            operation.append(st)
                             cu = 0
                             st = ''
                     else:
                         st += y
-                op_queue.put(st)
+                operation.append(st)
                 st = ''
                 cu = 0
             elif 'PD' in x:
-                op_queue.put('PD')
+                operation.append('PD')
                 raw_st = x
-                l = len(x)
                 for y in raw_st:
                     try:
                         float(y)
@@ -53,20 +46,35 @@ with open(filename) as f:
                             st += ','
                             cd = 1
                         elif y == ',' and cd == 1:
-                            op_queue.put(st)
+                            operation.append(st)
                             cd = 0
                             st = ''
                     else:
                         st += y
-                op_queue.put(st)
+                operation.append(st)
                 st = ''
                 cd = 0
             else:
-                op_queue.put(x)
+                operation.append(x)
+                
+x = []
+st = ''
+if ',' in operation[i]:
+    for y in operation[i]:
+        try:
+            float(y)
+        except:
+            if y == ',':
+                x[0] = st
+                st = ''
+        else:
+            st += y
+        x[1] = st
+        st = ''
                         
     #print(data)
-    while op_queue.any():
-        print(op_queue.get())
+    #while op_queue.any():
+    #print(op_queue.get())
     # try:
     #     float(data[0])
     #     float(data[1])

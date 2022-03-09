@@ -10,7 +10,9 @@
 from pyb import USB_VCP
 from nb_input import NB_Input
 from micropython import const
-import cqueue
+import task_share
+import hpgl_agena_chiu
+import math
 
 ## State 0 of the user interface task
 S0_CALIB            = const(0)
@@ -19,9 +21,13 @@ S1_HELP             = const(1)
 ## State 2 of the user interface task
 S2_WAIT_FOR_CHAR    = const(2)
 ## State 3 of the user interface task
-S3_PLOT             = const(3)
+S3_READ             = const(3)
+## State 4 of the user interface task
+S4_PLOT             = const(4)
 
 nb_in = NB_Input (USB_VCP(), echo=True)
+
+op_queue = task_share.Queue('B', 1500, name = 'Operation Share')
 
 def input_task():
         """!  Task which runs the non-blocking input object quickly to ensure
@@ -63,77 +69,34 @@ def task_user(state = S0_CALIB):
                 elif char_in == 'm' or char_in == 'M':
                     print('\r\nPosition set')
                 elif char_in == 'p' or char_in == 'P':
-                    state = S3_PLOT
+                    state = S3_READ
                     i = 0
         
-        elif state == S3_PLOT:
-            op_queue = cqueue.ByteQueue()
+        elif state == S3_READ:
             if i == 0:
                 print('\r\nEnter hpgl file name:')
             elif nb_in.any ():
                 filename = nb_in.get()
                 print('\r\n',filename)
                 if '.hpgl' in filename or '.HPGL' in filename:
-                    operation = []
-                    raw_st = ''
-                    st = ''
-                    cu = 0
-                    cd = 0
-                    with open(filename) as f:
-                        ## A variable that reads lines of code from the Nucleo.
-                        raw_data = f.readlines()
-                        data = ''.join(raw_data)
-                        ## A variable that separates strings into ordered lists of data.
-                        #for x in data:
-                        data = data.split(';')
-                        for x in data:
-                            try:
-                                float(x)
-                            except:
-                                if 'PU' in x:
-                                    operation.append('PU')
-                                    raw_st = x
-                                    for y in raw_st:
-                                        try:
-                                            float(y)
-                                        except:
-                                            if y == ',' and cu == 0:
-                                                st += ','
-                                                cu = 1
-                                            elif y == ',' and cu == 1:
-                                                operation.append(st)
-                                                cu = 0
-                                                st = ''
-                                        else:
-                                            st += y
-                                    operation.append(st)
-                                    st = ''
-                                    cu = 0
-                                elif 'PD' in x:
-                                    operation.append('PD')
-                                    raw_st = x
-                                    for y in raw_st:
-                                        try:
-                                            float(y)
-                                        except:
-                                            if y == ',' and cd == 0:
-                                                st += ','
-                                                cd = 1
-                                            elif y == ',' and cd == 1:
-                                                operation.append(st)
-                                                cd = 0
-                                                st = ''
-                                        else:
-                                            st += y
-                                    operation.append(st)
-                                    st = ''
-                                    cd = 0
-                                else:
-                                    operation.append(x)
+                    hpgl = hpgl_agena_chiu(filename)
+                    hpgl.read()
                 else:
                     print('\r\ninvalid file name')
             i += 1
-
+            state = S4_PLOT
+        
+        elif state == S4_PLOT:
+            hpgl.run()
+            x = hpgl.report_x()
+            y = hpgl.report_y()
+            x_scaled = (x/1016) - 3
+            y_scaled = (y/1016) + 5.59
+            r = math.sqrt(x_scaled^2 + y_scaled^2)
+            duty1 = (r*16384)/0.04167
+            duty2 = (16384*20.27*math.cosa(x_scaled*r))/2
+            lin_set.put(duty1)
+            ang_set.put(duty2)
         yield 0
 
 if __name__ == "__main__":
