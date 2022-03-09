@@ -77,6 +77,7 @@ def task_user(state = S0_CALIB):
                         while True:
                             ## A variable that reads lines of code from the Nucleo.
                             raw_data = f.readlines()
+                            raw_data = raw_data[0]
                             ## A variable that separates strings into ordered lists of data.
                             #data = raw_data.split(';')
                             print(raw_data[0])
