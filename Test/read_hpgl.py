@@ -1,3 +1,8 @@
+import cqueue
+import task_share
+QUEUE_SIZE = 100000
+op_queue = cqueue.ByteQueue(QUEUE_SIZE)
+
 filename = 'test_file.hpgl'
 operation = []
 raw_st = ''
@@ -17,7 +22,7 @@ with open(filename) as f:
             float(x)
         except:
             if 'PU' in x:
-                operation.append('PU')
+                op_queue.put('PU')
                 raw_st = x
                 l = len(x)
                 for y in raw_st:
@@ -28,16 +33,16 @@ with open(filename) as f:
                             st += ','
                             cu = 1
                         elif y == ',' and cu == 1:
-                            operation.append(st)
+                            op_queue.put(st)
                             cu = 0
                             st = ''
                     else:
                         st += y
-                operation.append(st)
+                op_queue.put(st)
                 st = ''
                 cu = 0
             elif 'PD' in x:
-                operation.append('PD')
+                op_queue.put('PD')
                 raw_st = x
                 l = len(x)
                 for y in raw_st:
@@ -48,20 +53,20 @@ with open(filename) as f:
                             st += ','
                             cd = 1
                         elif y == ',' and cd == 1:
-                            operation.append(st)
+                            op_queue.put(st)
                             cd = 0
                             st = ''
                     else:
                         st += y
-                operation.append(st)
+                op_queue.put(st)
                 st = ''
                 cd = 0
             else:
-                operation.append(x)
+                op_queue.put(x)
                         
     #print(data)
-    for i in operation:
-        print(i)
+    while op_queue.any():
+        print(op_queue.get())
     # try:
     #     float(data[0])
     #     float(data[1])

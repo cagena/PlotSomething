@@ -10,6 +10,7 @@
 from pyb import USB_VCP
 from nb_input import NB_Input
 from micropython import const
+import cqueue
 
 ## State 0 of the user interface task
 S0_CALIB            = const(0)
@@ -66,6 +67,7 @@ def task_user(state = S0_CALIB):
                     i = 0
         
         elif state == S3_PLOT:
+            op_queue = cqueue.ByteQueue()
             if i == 0:
                 print('\r\nEnter hpgl file name:')
             elif nb_in.any ():
