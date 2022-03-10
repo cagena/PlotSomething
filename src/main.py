@@ -73,9 +73,9 @@ def task_motor1(duty_cycle = 0):
         ## A variable that defines duty cycle for the controller's run function.
         enc1 = encoder_drv1.read()
         duty_cycle = controller_1.run(enc1, 100)
-        print(duty_cycle)
+        # print(duty_cycle)
         motor_drv1.set_duty_cycle(duty_cycle)
-        if encoder_drv1.read() >= lin_set.get() - 500 and encoder_drv1.read() <= lin_set.get() + 500:
+        if encoder_drv1.read() >= lin_set.get() - 50 and encoder_drv1.read() <= lin_set.get() + 50:
             move_flag1.put(1)
 #         if difference <= 1500:
 #             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
@@ -100,7 +100,7 @@ def task_motor2(duty_cycle = 0):
         ## A variable that defines duty cycle for the controller's run function.
         duty_cycle = controller_2.run(enc2,100)
         motor_drv2.set_duty_cycle(duty_cycle)
-        if encoder_drv2.read() >= ang_set.get() - 500 and encoder_drv2.read() <= ang_set.get() + 500:
+        if encoder_drv2.read() >= ang_set.get() - 50 and encoder_drv2.read() <= ang_set.get() + 50:
             move_flag2.put(1)
         # if difference >= 1500:
         #     motor_drv2.disable()
@@ -114,10 +114,10 @@ def input_task():
         that keypresses are handled not long after they've occurred. """
         while True:
             nb_in.check ()
-            yield 0
+            yield ()
 
 def task_user(state = S0_CALIB, calib_flag = 0):
-     while True:
+    while True:
         if state == S0_CALIB:
             if calib_flag == 0:
                 print('\r\nReady to Calibrate? Press c and Enter')
@@ -137,20 +137,22 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                                 encoder_drv1.zero()
                                 encoder_drv2.zero()
                                 motor_drv1.set_duty_cycle(0)
+                                state = S1_HELP
                                 break
-                        state = S1_HELP
                     else:
-                        state = S1_HELP
                         encoder_drv1.zero()
                         encoder_drv2.zero()
+                        motor_drv1.set_duty_cycle(0)
+                        state = S1_HELP
+                        
         elif state == S1_HELP:
             print('\n\rWelcome, press:'
                   '\n\'p\' to plot from a HPGL file'
-#                   '\n\'d\' to set the both motors to a duty cycle of 0'
+    #                   '\n\'d\' to set the both motors to a duty cycle of 0'
                    '\n\'l\' to prompt the user to enter a setpoint for'
                    ' lead screw'
-#                   '\n\'a\' to prompt the user to enter a setpoint for'
-#                   ' the wheel'
+    #                   '\n\'a\' to prompt the user to enter a setpoint for'
+    #                   ' the wheel'
                   '\n\'q\' to quit'
                   '\n\'h\' return to the welcome screen')
             state = S2_WAIT_FOR_CHAR
@@ -196,17 +198,17 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                 if '.hpgl' in filename or '.HPGL' in filename:
                     hpgl.read(filename)
                     state = S4_PLOT
+                    plot_count = 0
+                    move_flag1.put(1)
+                    move_flag2.put(1)
                     print('Plotting')
                 else:
                     print('\r\ninvalid file name')
             i += 1
         
         elif state == S4_PLOT:
-            plot_count = 0
-            move_flag1.put(1)
-            move_flag2.put(1)
             length = hpgl.length()
-            while plot_count <= length:
+            if plot_count <= length:
                 if move_flag1.get() == 1 and move_flag2.get() == 1:
                     move_flag1.put(0)
                     move_flag2.put(0)
@@ -233,19 +235,16 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         elif x == 'IN' and plot_count > 0:
                             print('quit')
                             state = S1_HELP
-                            break
                         else:
                             print('hi')
                             plot_count += 1
-                            move_flag1.put(1)
-                            move_flag2.put(1)
                     else:
                         #print('{:},{:}'.format(x,y))
-#                         x_scaled = (int(x)/1016) - 3 - 2.5
-#                         y_scaled = (int(y)/1016) + 5.59
-#                         r = math.sqrt(x_scaled**2 + y_scaled**2)
-#                         duty1 = (r*16384)/0.04167
-#                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
+    #                         x_scaled = (int(x)/1016) - 3 - 2.5
+    #                         y_scaled = (int(y)/1016) + 5.59
+    #                         r = math.sqrt(x_scaled**2 + y_scaled**2)
+    #                         duty1 = (r*16384)/0.04167
+    #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
                         print('uh')
                         y = output[1]
                         lin_set.put(int(x))
@@ -254,8 +253,7 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         # controller_2.set_setpoint(y)
                         print(x,y)
                         plot_count += 1
-        
-        yield 0
+        yield ()
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
