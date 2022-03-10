@@ -19,6 +19,8 @@ from nb_input import NB_Input
 from micropython import const
 import hpgl_agena_chiu
 import math
+import sys
+from array import array
 
 ## State 0 of the user interface task
 S0_CALIB            = const(0)
@@ -33,7 +35,7 @@ S4_PLOT             = const(4)
 
 nb_in = NB_Input (USB_VCP(), echo=True)
 
-op_queue = task_share.Queue('B', 1500, name = 'Operation Share')
+
 
 # from pyb import USB_VCP
 # from nb_input import NB_Input
@@ -108,32 +110,38 @@ def input_task():
             nb_in.check ()
             yield 0
 
-def task_user(state = S0_CALIB):
+def task_user(state = S0_CALIB, calib_flag = 0):
      while True:
         if state == S0_CALIB:
-            print('Ready to Calibrate? Press Enter')
+            if calib_flag == 0:
+                print('\r\nReady to Calibrate? Press c and Enter')
+                calib_flag = 1
             if nb_in.any ():
                 char_in = nb_in.get()
-                if char_in == '\r' or char_in == '\n':
-                    continue
-            pin = pyb.Pin(pyb.Pin.cpu.A0, pyb.Pin.IN)
-            adc = pyb.ADC(pin)
-            motor_drv1.set_duty_cycle(-100)
-            while True:
-                val = adc.read()
-                if val <= 5:
-                    motor_drv1.set_duty_cycle(0)
-                    break
-            state = S1_HELP
+                if char_in == 'c':
+                    print('\r\nCalibrating')
+                    pin = pyb.Pin(pyb.Pin.cpu.A0, pyb.Pin.IN)
+                    adc = pyb.ADC(pin)
+                    val = adc.read()
+                    if val > 10:
+                        motor_drv1.set_duty_cycle(-100)
+                        while True:
+                            val = adc.read()
+                            if val <= 5:
+                                motor_drv1.set_duty_cycle(0)
+                                break
+                        state = S1_HELP
+                    else:
+                        state = S1_HELP
             
         elif state == S1_HELP:
             print('\n\rWelcome, press:'
                   '\n\'p\' to plot from a HPGL file'
-                  '\n\'d\' to set the both motors to a duty cycle of 0'
-                  '\n\'l\' to prompt the user to enter a setpoint for'
-                  ' lead screw'
-                  '\n\'a\' to prompt the user to enter a setpoint for'
-                  ' the wheel'
+#                   '\n\'d\' to set the both motors to a duty cycle of 0'
+                   '\n\'l\' to prompt the user to enter a setpoint for'
+                   ' lead screw'
+#                   '\n\'a\' to prompt the user to enter a setpoint for'
+#                   ' the wheel'
                   '\n\'q\' to quit'
                   '\n\'h\' return to the welcome screen')
             state = S2_WAIT_FOR_CHAR
@@ -142,12 +150,26 @@ def task_user(state = S0_CALIB):
             if nb_in.any ():
                 char_in = nb_in.get()
                 if char_in == 'q':
+                    motor_drv1.set_duty_cycle(0)
+                    motor_drv2.set_duty_cycle(0)
                     print('\r\nThe program was exited')
+                    sys.exit()
                 elif char_in == 'h':
                     state = S1_HELP
                     print('\r\n')
                 elif char_in == 'l':
-                    print('\r\nLinear position set')
+                    print('\r\nLinear position adjustment')
+                    if nb_in.any():
+                        char_in = nb_in.get()
+                        if char_in == '+':
+                            print('\r\nPositve Linear Motion')
+                            motor_drv1.set_duty_cycle(100)
+                        elif char_in == '-':
+                            print('\r\nNegative Linear Motion')
+                            motor_drv1.set_duty_cycle(-100)
+                        elif char_in == 's':
+                            print('\r\nStopped Motion')
+                            motor_drv1.set_duty_cycle(0)
                 elif char_in == 'a':
                     print('\r\nAngular position set')
                 elif char_in == 'm' or char_in == 'M':
@@ -163,29 +185,59 @@ def task_user(state = S0_CALIB):
                 filename = nb_in.get()
                 print('\r\n',filename)
                 if '.hpgl' in filename or '.HPGL' in filename:
-                    hpgl = hpgl_agena_chiu(filename)
-                    hpgl.read()
+                    hpgl.read(filename)
+                    hpgl.process()
+                    hpgl.run()
+                    state = S4_PLOT
+                    print('Plotting')
                 else:
                     print('\r\ninvalid file name')
             i += 1
-            state = S4_PLOT
         
         elif state == S4_PLOT:
-            move_flag1.put(0)
-            move_flag2.put(0)
-            for i in hpgl.length():
-                hpgl.run(i)
-                x = hpgl.report_x()
-                y = hpgl.report_y()
-                x_scaled = (x/1016) - 3
-                y_scaled = (y/1016) + 5.59
-                r = math.sqrt(x_scaled^2 + y_scaled^2)
-                duty1 = (r*16384)/0.04167
-                duty2 = (16384*20.27*math.cosa(x_scaled*r))/2
-                lin_set.put(duty1)
-                ang_set.put(duty2)
-                if move_flag1 == 1 and move_flag2 == 1:
-                    continue
+            plot_count = 0
+            move_flag1.put(1)
+            move_flag2.put(1)
+            length = hpgl.length()
+            sol = pyb.Pin(pyb.Pin.cpu.B3, pyb.Pin.OUT_PP)
+            while plot_count <= length:
+                if move_flag1.get() == 1 and move_flag2.get() == 1:
+                    move_flag1.put(0)
+                    move_flag2.put(0)
+                    hpgl.run(plot_count)
+                    x = hpgl.report_x(plot_count)
+                    y = hpgl.report_y(plot_count)
+                    print(x)
+                    try:
+                        float(x)
+                        float(y)
+                    except:
+                        if 'PU' in x:
+                            #sol.low()
+                            plot_count += 1
+                            move_flag1.put(1)
+                            move_flag2.put(1)
+                        elif 'PD' in x:
+                            #sol.high()
+                            plot_count += 1
+                            move_flag1.put(1)
+                            move_flag2.put(1)
+                        elif x == 'IN' and plot_count > 0:
+                            break
+                        else:
+                            plot_count += 1
+                            move_flag1.put(1)
+                            move_flag2.put(1)
+                    else:
+                        #print('{:},{:}'.format(x,y))
+#                         x_scaled = (int(x)/1016) - 3 - 2.5
+#                         y_scaled = (int(y)/1016) + 5.59
+#                         r = math.sqrt(x_scaled**2 + y_scaled**2)
+#                         duty1 = (r*16384)/0.04167
+#                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
+                        lin_set.put(x)
+                        ang_set.put(y)
+                        plot_count += 1
         
         yield 0
 
@@ -209,6 +261,8 @@ if __name__ == "__main__":
     motor_drv1.enable()
     motor_drv2.enable()
     
+    hpgl = hpgl_agena_chiu.hpglDriver()
+
     lin_set = task_share.Share('h', name = 'Linear Setpoint')
     ang_set = task_share.Share('h', name = 'Angular Setpoint')
     
