@@ -79,7 +79,7 @@ def task_motor1(duty_cycle = 0):
         if flag1 == True:
             move_flag1.put(1)
             flag2 = False
-            print('success')
+            #print(move_flag1.get())
         #print(enc1, lin_set.get())
         # if enc1 >= lin_set.get() - 100 and enc1 <= lin_set.get() + 100:
         #     move_flag1.put(1)
@@ -110,7 +110,7 @@ def task_motor2(duty_cycle = 0):
         if flag2 == True:
             move_flag2.put(1)
             flag2 = False
-            print('double success')
+            #print(move_flag2.get())
         # if enc2 >= ang_set.get() - 100 and enc2 <= ang_set.get() + 100:
         #     move_flag2.put(1)
         # if difference >= 1500:
@@ -234,14 +234,14 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                     if x == 'PU':
                         print('ho')
                         sol.low()
-                        utime.sleep(1)
+                        #utime.sleep(1)
                         plot_count += 1
                         move_flag1.put(1)
                         move_flag2.put(1)
                     elif x == 'PD':
                         print('he')
-                        sol.high()
-                        utime.sleep(1)
+                        #sol.high()
+                        #utime.sleep(1)
                         plot_count += 1
                         move_flag1.put(1)
                         move_flag2.put(1)
@@ -315,9 +315,9 @@ if __name__ == "__main__":
 #     else:
     ## A variable that requests for set point from the user.
 #    y = input('Input set point: ')
-    controller_1.set_gain(0.1)
+    controller_1.set_gain(0.2)
     controller_1.set_setpoint(0)
-    controller_2.set_gain(0.1)
+    controller_2.set_gain(0.2)
     controller_2.set_setpoint(0)
     encoder_drv1.zero()
     encoder_drv2.zero()
