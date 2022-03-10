@@ -141,7 +141,7 @@ class hpglDriver:
                 #x_scaled = (int(self.data1[i])/1016) - 3 - 2.5
                 #y_scaled = (int(self.data2[i])/1016) + 5.59
                 x_scaled = (int(self.x)/1016) - 3 - 2.5
-                y_scaled = (int(self.y)/1016) + 5.59
+                y_scaled = (int(self.y)/1016)
                 r = math.sqrt(x_scaled**2 + y_scaled**2)
                 duty1 = (r*16384)/0.04167
                 duty2 = (16384*20.27*math.acos(x_scaled/r))/2
@@ -163,11 +163,10 @@ class hpglDriver:
     def length(self):
         return len(self.operation)
 
-if __name__ == "__main__":
-    hpgl = hpglDriver()
-    operation = hpgl.read('lines.hpgl')
-    for i in range(len(operation)):
-        hpgl.process(i)
-        uh = hpgl.run(i)
-        print(uh[0])
-                
+# if __name__ == "__main__":
+    # hpgl = hpglDriver()
+    # operation = hpgl.read('lines.hpgl')
+    # for i in range(len(operation)):
+    #     hpgl.process(i)
+    #     uh = hpgl.run(i)
+    #     print(uh[0])

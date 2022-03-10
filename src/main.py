@@ -21,6 +21,7 @@ import hpgl_agena_chiu
 import math
 import sys
 from array import array
+import utime
 
 ## State 0 of the user interface task
 S0_CALIB            = const(0)
@@ -57,7 +58,7 @@ nb_in = NB_Input (USB_VCP(), echo=True)
 #         yield 0
     
 
-def task_motor1():
+def task_motor1(duty_cycle = 0):
     ## The variable that calculates change in time.
     #difference = 0
     ## The variable that marks the start of the timer.
@@ -68,10 +69,13 @@ def task_motor1():
         ## A variable that creates a timer which marks the current time.
         #current = utime.ticks_ms()
         #difference = (current - start)
+        controller_1.set_setpoint(lin_set.get())
         ## A variable that defines duty cycle for the controller's run function.
-        duty_cycle = controller_1.run(encoder_drv1.read(), 100)
+        enc1 = encoder_drv1.read()
+        duty_cycle = controller_1.run(enc1, 100)
+        print(duty_cycle)
         motor_drv1.set_duty_cycle(duty_cycle)
-        if encoder_drv1.read() >= ang_set.get() - 100 and encoder_drv1.read() <= ang_set.get() + 100:
+        if encoder_drv1.read() >= lin_set.get() - 500 and encoder_drv1.read() <= lin_set.get() + 500:
             move_flag1.put(1)
 #         if difference <= 1500:
 #             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
@@ -82,7 +86,7 @@ def task_motor1():
 #                 runs1 = 1
         yield()
 
-def task_motor2():
+def task_motor2(duty_cycle = 0):
     ## The variable that calculates change in time.
     # difference = 0
     ## The variable that marks the start of the timer.
@@ -91,10 +95,12 @@ def task_motor2():
         ## A variable that creates a timer which marks the current time.
         # current = utime.ticks_ms()
         # difference = (current - start)
+        controller_2.set_setpoint(ang_set.get())
+        enc2 = encoder_drv2.read()
         ## A variable that defines duty cycle for the controller's run function.
-        duty_cycle = controller_2.run(encoder_drv2.read(),100)
+        duty_cycle = controller_2.run(enc2,100)
         motor_drv2.set_duty_cycle(duty_cycle)
-        if encoder_drv2.read() >= ang_set.get() - 100 and encoder_drv2.read() <= ang_set.get() + 100:
+        if encoder_drv2.read() >= ang_set.get() - 500 and encoder_drv2.read() <= ang_set.get() + 500:
             move_flag2.put(1)
         # if difference >= 1500:
         #     motor_drv2.disable()
@@ -128,12 +134,15 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         while True:
                             val = adc.read()
                             if val <= 5:
+                                encoder_drv1.zero()
+                                encoder_drv2.zero()
                                 motor_drv1.set_duty_cycle(0)
                                 break
                         state = S1_HELP
                     else:
                         state = S1_HELP
-            
+                        encoder_drv1.zero()
+                        encoder_drv2.zero()
         elif state == S1_HELP:
             print('\n\rWelcome, press:'
                   '\n\'p\' to plot from a HPGL file'
@@ -197,7 +206,6 @@ def task_user(state = S0_CALIB, calib_flag = 0):
             move_flag1.put(1)
             move_flag2.put(1)
             length = hpgl.length()
-            sol = pyb.Pin(pyb.Pin.cpu.B3, pyb.Pin.OUT_PP)
             while plot_count <= length:
                 if move_flag1.get() == 1 and move_flag2.get() == 1:
                     move_flag1.put(0)
@@ -209,16 +217,22 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         float(x)
                     except:
                         if 'PU' in x:
+                            print('ho')
                             sol.low()
+                            utime.sleep(1)
                             plot_count += 1
                             move_flag1.put(1)
                             move_flag2.put(1)
                         elif 'PD' in x:
+                            print('he')
                             sol.high()
+                            utime.sleep(1)
                             plot_count += 1
                             move_flag1.put(1)
                             move_flag2.put(1)
                         elif x == 'IN' and plot_count > 0:
+                            print('quit')
+                            state = S1_HELP
                             break
                         else:
                             print('hi')
@@ -232,9 +246,13 @@ def task_user(state = S0_CALIB, calib_flag = 0):
 #                         r = math.sqrt(x_scaled**2 + y_scaled**2)
 #                         duty1 = (r*16384)/0.04167
 #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
+                        print('uh')
                         y = output[1]
                         lin_set.put(int(x))
                         ang_set.put(int(y))
+                        # controller_1.set_setpoint(x)
+                        # controller_2.set_setpoint(y)
+                        print(x,y)
                         plot_count += 1
         
         yield 0
@@ -267,6 +285,8 @@ if __name__ == "__main__":
     move_flag1 = task_share.Share('B', name = 'Movement Flag 1')
     move_flag2 = task_share.Share('B', name = 'Movement Flag 2')
     
+    sol = pyb.Pin(pyb.Pin.cpu.B3, pyb.Pin.OUT_PP)
+    
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
     gc.collect ()
@@ -281,10 +301,10 @@ if __name__ == "__main__":
 #     else:
     ## A variable that requests for set point from the user.
 #    y = input('Input set point: ')
-#    controller_1.set_gain(0.1)
-#    controller_1.set_setpoint(y)
-#    controller_2.set_gain(0.1)
-#    controller_2.set_setpoint(y)
+    controller_1.set_gain(0.1)
+    controller_1.set_setpoint(0)
+    controller_2.set_gain(0.1)
+    controller_2.set_setpoint(0)
     encoder_drv1.zero()
     encoder_drv2.zero()
     # Create the tasks. If trace is enabled for any task, memory will be
@@ -297,7 +317,7 @@ if __name__ == "__main__":
                          period = 10, profile = True, trace = False)
     in_task = cotask.Task (input_task, name = 'Input Task', priority = 1, 
                            period = 50, profile = True, trace = False)
-    task_user = cotask.Task (task_user, name = 'User Task', priority = 0, 
+    task_user = cotask.Task (task_user, name = 'User Task', priority = 2, 
                            period = 100, profile = True, trace = False)
     cotask.task_list.append (task1)
     cotask.task_list.append (task2)
