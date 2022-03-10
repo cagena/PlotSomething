@@ -64,3 +64,19 @@ class EncoderDriver:
         Sets the encoder reading to zero.
         '''
         self.pos = 0   
+
+if __name__ == '__main__':
+    import utime
+    ## A variable that creates a encoder driver for encoder 1.
+    encoder_drv1 = EncoderDriver(pyb.Pin.cpu.B6, pyb.Pin.cpu.B7, 4)
+    #encoder_drv1 = EncoderDriver(pyb.Pin.cpu.A6, pyb.Pin.cpu.A7, 17)
+    ## A variable that creates a encoder driver for encoder 2.
+    encoder_drv2 = EncoderDriver(pyb.Pin.cpu.C6, pyb.Pin.cpu.C7, 8)
+    while True:
+        enc1 = encoder_drv1.read()
+        enc2 = encoder_drv2.read()
+        print(enc1,enc2)
+        utime.sleep(.5)
+        
+         
+     

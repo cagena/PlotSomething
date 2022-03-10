@@ -71,11 +71,12 @@ def task_motor1(duty_cycle = 0):
         #difference = (current - start)
         controller_1.set_setpoint(lin_set.get())
         ## A variable that defines duty cycle for the controller's run function.
-        enc1 = encoder_drv1.read()
+        enc1 = -encoder_drv1.read()
         duty_cycle = controller_1.run(enc1, 100)
         # print(duty_cycle)
         motor_drv1.set_duty_cycle(duty_cycle)
-        if encoder_drv1.read() >= lin_set.get() - 50 and encoder_drv1.read() <= lin_set.get() + 50:
+        #print(enc1, lin_set.get())
+        if enc1 >= lin_set.get() - 50 and enc1 <= lin_set.get() + 50:
             move_flag1.put(1)
 #         if difference <= 1500:
 #             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
@@ -96,11 +97,11 @@ def task_motor2(duty_cycle = 0):
         # current = utime.ticks_ms()
         # difference = (current - start)
         controller_2.set_setpoint(ang_set.get())
-        enc2 = encoder_drv2.read()
+        enc2 = -encoder_drv2.read()
         ## A variable that defines duty cycle for the controller's run function.
         duty_cycle = controller_2.run(enc2,100)
         motor_drv2.set_duty_cycle(duty_cycle)
-        if encoder_drv2.read() >= ang_set.get() - 50 and encoder_drv2.read() <= ang_set.get() + 50:
+        if enc2 >= ang_set.get() - 50 and enc2 <= ang_set.get() + 50:
             move_flag2.put(1)
         # if difference >= 1500:
         #     motor_drv2.disable()
@@ -237,6 +238,8 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                             state = S1_HELP
                         else:
                             print('hi')
+                            move_flag1.put(1)
+                            move_flag2.put(1)
                             plot_count += 1
                     else:
                         #print('{:},{:}'.format(x,y))
@@ -247,6 +250,8 @@ def task_user(state = S0_CALIB, calib_flag = 0):
     #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
                         print('uh')
                         y = output[1]
+                        enc3 = -encoder_drv1.read()
+                        print(enc3)
                         lin_set.put(int(x))
                         ang_set.put(int(y))
                         # controller_1.set_setpoint(x)
