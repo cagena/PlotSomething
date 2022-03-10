@@ -78,7 +78,7 @@ def task_motor1(duty_cycle = 0):
         flag1 = controller_1.flag()
         if flag1 == True:
             move_flag1.put(1)
-            flag2 = False
+            flag1 = False
             #print(move_flag1.get())
         #print(enc1, lin_set.get())
         # if enc1 >= lin_set.get() - 100 and enc1 <= lin_set.get() + 100:
@@ -221,7 +221,7 @@ def task_user(state = S0_CALIB, calib_flag = 0):
         elif state == S4_PLOT:
             mflag1 = move_flag1.get()
             mflag2 = move_flag2.get()
-            if mflag1 == 1 and mflag2 == 1:
+            if mflag1 and mflag2:
                 print('in loop')
                 move_flag1.put(0)
                 move_flag2.put(0)
@@ -240,7 +240,7 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         move_flag2.put(1)
                     elif x == 'PD':
                         print('he')
-                        #sol.high()
+                        sol.high()
                         #utime.sleep(1)
                         plot_count += 1
                         move_flag1.put(1)
@@ -261,14 +261,16 @@ def task_user(state = S0_CALIB, calib_flag = 0):
 #                         duty1 = (r*16384)/0.04167
 #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
                     print('uh')
-                    y = output[1]
+                    if output[1]:
+                        print('uhh')
+                        y = output[1]
                     #x_int = int(x)
                     #y_int = int(y)
                     # lin_set.put(x_int)
                     # ang_set.put(y_int)
-                    controller_1.set_setpoint(x)
-                    controller_2.set_setpoint(y)
-                    plot_count += 1
+                        controller_1.set_setpoint(x)
+                        controller_2.set_setpoint(y)
+                        plot_count += 1
         yield ()
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
@@ -315,9 +317,9 @@ if __name__ == "__main__":
 #     else:
     ## A variable that requests for set point from the user.
 #    y = input('Input set point: ')
-    controller_1.set_gain(0.2)
+    controller_1.set_gain(0.1)
     controller_1.set_setpoint(0)
-    controller_2.set_gain(0.2)
+    controller_2.set_gain(0.1)
     controller_2.set_setpoint(0)
     encoder_drv1.zero()
     encoder_drv2.zero()
@@ -331,7 +333,7 @@ if __name__ == "__main__":
                          period = 10, profile = True, trace = False)
     in_task = cotask.Task (input_task, name = 'Input Task', priority = 1, 
                            period = 50, profile = True, trace = False)
-    task_user = cotask.Task (task_user, name = 'User Task', priority = 2, 
+    task_user = cotask.Task (task_user, name = 'User Task', priority = 0, 
                            period = 100, profile = True, trace = False)
     cotask.task_list.append (task1)
     cotask.task_list.append (task2)

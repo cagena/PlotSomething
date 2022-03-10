@@ -163,10 +163,10 @@ class hpglDriver:
     def length(self):
         return len(self.operation)
 
-# if __name__ == "__main__":
-    # hpgl = hpglDriver()
-    # operation = hpgl.read('lines.hpgl')
-    # for i in range(len(operation)):
-    #     hpgl.process(i)
-    #     uh = hpgl.run(i)
-    #     print(uh[0])
+if __name__ == "__main__":
+    hpgl = hpglDriver()
+    operation = hpgl.read('lines.hpgl')
+    for i in range(len(operation)):
+        hpgl.process(i)
+        uh = hpgl.run(i)
+        print(uh[0],uh[1])
