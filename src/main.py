@@ -186,8 +186,6 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                 print('\r\n',filename)
                 if '.hpgl' in filename or '.HPGL' in filename:
                     hpgl.read(filename)
-                    hpgl.process()
-                    hpgl.run()
                     state = S4_PLOT
                     print('Plotting')
                 else:
@@ -204,27 +202,26 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                 if move_flag1.get() == 1 and move_flag2.get() == 1:
                     move_flag1.put(0)
                     move_flag2.put(0)
-                    hpgl.run(plot_count)
-                    x = hpgl.report_x(plot_count)
-                    y = hpgl.report_y(plot_count)
-                    print(x)
+                    hpgl.process(plot_count)
+                    output = hpgl.run(plot_count)
+                    x = output[0]
                     try:
                         float(x)
-                        float(y)
                     except:
                         if 'PU' in x:
-                            #sol.low()
+                            sol.low()
                             plot_count += 1
                             move_flag1.put(1)
                             move_flag2.put(1)
                         elif 'PD' in x:
-                            #sol.high()
+                            sol.high()
                             plot_count += 1
                             move_flag1.put(1)
                             move_flag2.put(1)
                         elif x == 'IN' and plot_count > 0:
                             break
                         else:
+                            print('hi')
                             plot_count += 1
                             move_flag1.put(1)
                             move_flag2.put(1)
@@ -235,8 +232,9 @@ def task_user(state = S0_CALIB, calib_flag = 0):
 #                         r = math.sqrt(x_scaled**2 + y_scaled**2)
 #                         duty1 = (r*16384)/0.04167
 #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
-                        lin_set.put(x)
-                        ang_set.put(y)
+                        y = output[1]
+                        lin_set.put(int(x))
+                        ang_set.put(int(y))
                         plot_count += 1
         
         yield 0
