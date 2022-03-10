@@ -34,18 +34,23 @@ class ControllerDriver:
         '''
         ## Error, difference between the current position and initial setpoint.
         if pos < self.i_set:
-            error = abs(pos - self.i_set)
+            self.error = abs(pos - self.i_set)
         elif pos > self.i_set:
-            error = abs(pos - self.i_set)*(-1)
+            self.error = abs(pos - self.i_set)*(-1)
         elif pos == self.i_set:
-            error = 0
+            self.error = 0
+        
         ## Actuation signal or percent duty cycle to set the motor.
-        duty = error*self.K_p
+        duty = self.error*self.K_p
         if duty > max_duty:
             duty = max_duty
         elif duty < -max_duty:
             duty = -max_duty
         return duty
+    
+    def flag(self):
+        if self.error >= -25 and self.error <= 25:
+            return True
         
     def set_setpoint(self,setpoint):
         '''!

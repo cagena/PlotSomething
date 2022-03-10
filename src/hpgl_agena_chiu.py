@@ -140,11 +140,11 @@ class hpglDriver:
             else:
                 #x_scaled = (int(self.data1[i])/1016) - 3 - 2.5
                 #y_scaled = (int(self.data2[i])/1016) + 5.59
-                x_scaled = (int(self.x)/1016) - 3 - 2.5
+                x_scaled = (int(self.x)/1016) - 3
                 y_scaled = (int(self.y)/1016)
                 r = math.sqrt(x_scaled**2 + y_scaled**2)
                 duty1 = (r*16384)/0.04167
-                duty2 = (16384*20.27*math.acos(x_scaled/r))/2
+                duty2 = (16384*r*math.acos(x_scaled/r))/(2*3.14)
                 self.x = duty1
                 self.y = duty2
                 return [self.x,self.y]

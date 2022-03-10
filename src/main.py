@@ -69,15 +69,20 @@ def task_motor1(duty_cycle = 0):
         ## A variable that creates a timer which marks the current time.
         #current = utime.ticks_ms()
         #difference = (current - start)
-        controller_1.set_setpoint(lin_set.get())
+        #controller_1.set_setpoint(lin_set.get())
         ## A variable that defines duty cycle for the controller's run function.
         enc1 = -encoder_drv1.read()
         duty_cycle = controller_1.run(enc1, 100)
         # print(duty_cycle)
         motor_drv1.set_duty_cycle(duty_cycle)
-        #print(enc1, lin_set.get())
-        if enc1 >= lin_set.get() - 50 and enc1 <= lin_set.get() + 50:
+        flag1 = controller_1.flag()
+        if flag1 == True:
             move_flag1.put(1)
+            flag2 = False
+            print('success')
+        #print(enc1, lin_set.get())
+        # if enc1 >= lin_set.get() - 100 and enc1 <= lin_set.get() + 100:
+        #     move_flag1.put(1)
 #         if difference <= 1500:
 #             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
 #         else:
@@ -96,13 +101,18 @@ def task_motor2(duty_cycle = 0):
         ## A variable that creates a timer which marks the current time.
         # current = utime.ticks_ms()
         # difference = (current - start)
-        controller_2.set_setpoint(ang_set.get())
+        #controller_2.set_setpoint(ang_set.get())
         enc2 = -encoder_drv2.read()
         ## A variable that defines duty cycle for the controller's run function.
-        duty_cycle = controller_2.run(enc2,100)
-        motor_drv2.set_duty_cycle(duty_cycle)
-        if enc2 >= ang_set.get() - 50 and enc2 <= ang_set.get() + 50:
+        duty_cycle = controller_2.run(enc2,75)
+        motor_drv2.set_duty_cycle(-duty_cycle)
+        flag2 = controller_2.flag()
+        if flag2 == True:
             move_flag2.put(1)
+            flag2 = False
+            print('double success')
+        # if enc2 >= ang_set.get() - 100 and enc2 <= ang_set.get() + 100:
+        #     move_flag2.put(1)
         # if difference >= 1500:
         #     motor_drv2.disable()
         # The print portion is commented out for the second motor.
@@ -121,6 +131,7 @@ def task_user(state = S0_CALIB, calib_flag = 0):
     while True:
         if state == S0_CALIB:
             if calib_flag == 0:
+                sol.low()
                 print('\r\nReady to Calibrate? Press c and Enter')
                 calib_flag = 1
             if nb_in.any ():
@@ -208,56 +219,56 @@ def task_user(state = S0_CALIB, calib_flag = 0):
             i += 1
         
         elif state == S4_PLOT:
-            length = hpgl.length()
-            if plot_count <= length:
-                if move_flag1.get() == 1 and move_flag2.get() == 1:
-                    move_flag1.put(0)
-                    move_flag2.put(0)
-                    hpgl.process(plot_count)
-                    output = hpgl.run(plot_count)
-                    x = output[0]
-                    try:
-                        float(x)
-                    except:
-                        if 'PU' in x:
-                            print('ho')
-                            sol.low()
-                            utime.sleep(1)
-                            plot_count += 1
-                            move_flag1.put(1)
-                            move_flag2.put(1)
-                        elif 'PD' in x:
-                            print('he')
-                            sol.high()
-                            utime.sleep(1)
-                            plot_count += 1
-                            move_flag1.put(1)
-                            move_flag2.put(1)
-                        elif x == 'IN' and plot_count > 0:
-                            print('quit')
-                            state = S1_HELP
-                        else:
-                            print('hi')
-                            move_flag1.put(1)
-                            move_flag2.put(1)
-                            plot_count += 1
-                    else:
-                        #print('{:},{:}'.format(x,y))
-    #                         x_scaled = (int(x)/1016) - 3 - 2.5
-    #                         y_scaled = (int(y)/1016) + 5.59
-    #                         r = math.sqrt(x_scaled**2 + y_scaled**2)
-    #                         duty1 = (r*16384)/0.04167
-    #                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
-                        print('uh')
-                        y = output[1]
-                        enc3 = -encoder_drv1.read()
-                        print(enc3)
-                        lin_set.put(int(x))
-                        ang_set.put(int(y))
-                        # controller_1.set_setpoint(x)
-                        # controller_2.set_setpoint(y)
-                        print(x,y)
+            mflag1 = move_flag1.get()
+            mflag2 = move_flag2.get()
+            if mflag1 == 1 and mflag2 == 1:
+                print('in loop')
+                move_flag1.put(0)
+                move_flag2.put(0)
+                hpgl.process(plot_count)
+                output = hpgl.run(plot_count)
+                x = output[0]
+                try:
+                    float(x)
+                except:
+                    if x == 'PU':
+                        print('ho')
+                        sol.low()
+                        utime.sleep(1)
                         plot_count += 1
+                        move_flag1.put(1)
+                        move_flag2.put(1)
+                    elif x == 'PD':
+                        print('he')
+                        sol.high()
+                        utime.sleep(1)
+                        plot_count += 1
+                        move_flag1.put(1)
+                        move_flag2.put(1)
+                    elif x == 'IN' and plot_count > 0:
+                        print('quit')
+                        state = S1_HELP
+                    else:
+                        print('hi')
+                        move_flag1.put(1)
+                        move_flag2.put(1)
+                        plot_count += 1
+                else:
+                    #print('{:},{:}'.format(x,y))
+#                         x_scaled = (int(x)/1016) - 3 - 2.5
+#                         y_scaled = (int(y)/1016) + 5.59
+#                         r = math.sqrt(x_scaled**2 + y_scaled**2)
+#                         duty1 = (r*16384)/0.04167
+#                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
+                    print('uh')
+                    y = output[1]
+                    #x_int = int(x)
+                    #y_int = int(y)
+                    # lin_set.put(x_int)
+                    # ang_set.put(y_int)
+                    controller_1.set_setpoint(x)
+                    controller_2.set_setpoint(y)
+                    plot_count += 1
         yield ()
 
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
@@ -282,8 +293,8 @@ if __name__ == "__main__":
     
     hpgl = hpgl_agena_chiu.hpglDriver()
 
-    lin_set = task_share.Share('h', name = 'Linear Setpoint')
-    ang_set = task_share.Share('h', name = 'Angular Setpoint')
+    lin_set = task_share.Share('L', name = 'Linear Setpoint')
+    ang_set = task_share.Share('l', name = 'Angular Setpoint')
     
     move_flag1 = task_share.Share('B', name = 'Movement Flag 1')
     move_flag2 = task_share.Share('B', name = 'Movement Flag 2')
