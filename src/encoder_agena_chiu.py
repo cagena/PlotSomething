@@ -6,6 +6,8 @@ to run functions.
 @author Luisa Chiu
 @date 1-26-2022
 '''
+
+# Import the required modules.
 import pyb
 
 class EncoderDriver:  
@@ -69,7 +71,6 @@ if __name__ == '__main__':
     import utime
     ## A variable that creates a encoder driver for encoder 1.
     encoder_drv1 = EncoderDriver(pyb.Pin.cpu.B6, pyb.Pin.cpu.B7, 4)
-    #encoder_drv1 = EncoderDriver(pyb.Pin.cpu.A6, pyb.Pin.cpu.A7, 17)
     ## A variable that creates a encoder driver for encoder 2.
     encoder_drv2 = EncoderDriver(pyb.Pin.cpu.C6, pyb.Pin.cpu.C7, 8)
     while True:

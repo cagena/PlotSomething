@@ -7,6 +7,7 @@
     @date        3-7-22
 """
 
+# Import the required modules.
 from pyb import USB_VCP
 from nb_input import NB_Input
 from micropython import const

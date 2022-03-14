@@ -6,8 +6,6 @@ driver to run functions.
 @author Luisa Chiu
 @date 1-27-2022
 '''
-
-import pyb
     
 class ControllerDriver:  
     '''! 
@@ -39,7 +37,7 @@ class ControllerDriver:
             self.error = abs(pos - self.i_set)*(-1)
         elif pos == self.i_set:
             self.error = 0
-        # print(self.error)
+            
         ## Actuation signal or percent duty cycle to set the motor.
         duty = self.error*self.K_p
         if duty > max_duty:
@@ -49,6 +47,11 @@ class ControllerDriver:
         return duty
     
     def flag(self):
+        '''! 
+        Sets returns a true statement if the error lands within the
+        specified bounds to stop the controller and move to the next value.
+        @return flag returns a true statement if error is within the bounds.
+        '''
         if self.error >= -100 and self.error <= 100:
             return True
         

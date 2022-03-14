@@ -1,52 +1,61 @@
 '''!
-@file controller_agena_chiu.py
-This is the file that serves as a module to be imported in main. It creates a class for the controller
-driver to run functions.
+@file hpgl_agena_chiu.py
+This is the file that serves as a module to be imported in main. It creates a class for a hpgl
+driver that opens and reads from a specified hpgl file.
 @author Corey Agena
 @author Luisa Chiu
 @date 1-27-2022
 '''
 
-from ulab import numpy as np
-from array import array
+# Import the required modules.
 import math
 
 class hpglDriver:  
     '''! 
-    This class implements a controller driver for a motor and flywheel rig. 
+    This class implements a hpgl driver to open and read from a hpgl file. 
     '''
     def __init__(self):
         '''! 
-        Creates a controller driver by initializing the gain
-        and initial setpoint used in closed-loop control.
-        @param K_p The initial proportional gain for the controller.
-        @param i_set The initial setpoint for the controller.
+        Creates a hpgl driver and initializes a few important variables that
+        will be used throughouth the class.
         '''
-        #self.data = np.zeros((500,2))
-        #self.operation = np.zeros(500)
-        #self.data1 = [0]*500
-        #self.data2 = [0]*500
+        ## A pre-allocated list used for storing the data read from the hpgl file.
         self.operation = [0]*500
+        
+        ## A variable that represents the setpoint of the first motor.
         self.x = 0
+        
+        ## A variable that represents the setpoint of the second motor.
         self.y = 0
         
     def read(self,filename):
         '''!
-        Called repeatedly to run the control algorithm.
-        @param pos Current position of the encoder.
-        @return duty Duty cycle to set the motor.
+        A generator that reads from the hpgl file and does the initial
+        processing of the data.
+        @param filename The name of the hpgl file.
+        @return operation The list holding the data post process.
         '''
+        
+        ## A string that holds the raw data read from the hpgl file.
         raw_st = ''
+        
+        ## A string that holds the data after the initial process.
         st = ''
+        
+        ## A flag that indicates a comma was read in a pen up operation.
         cu = 0
+        
+        ## A flag that indicates a comma was read in a pen down operation.
         cd = 0
+        
+        ## A counter that increases as values are added to the operation list.
         op_count = 0
+        
         with open(filename) as f:
             ## A variable that reads lines of code from the Nucleo.
             raw_data = f.readlines()
             data = ''.join(raw_data)
             ## A variable that separates strings into ordered lists of data.
-            #for x in data:
             data = data.split(';')
             for x in data:
                 try:
@@ -102,71 +111,93 @@ class hpglDriver:
         return self.operation
     
     def process(self,i):
-        #for i in range(len(self.operation)):
+        '''!
+        A generator that processes the data read from the hpgl file into data
+        more readable by the plotter itself.
+        @param i A counter that determines the amount of times that the generator ran.
+        @return x Both motor setpoints after this stage of the processing.
+        '''
+        ## A string variable that is appended to as new characters are read.
         st = ''
+        
+        ## A variable that holds the data from the operation list directly from the hpgl file.
         var = str(self.operation[i])
+        
         if ',' in var:
             for y in var:
                 try:
                     float(y)
                 except:
                     if y == ',':
-                        #self.data1[i] = st
                         self.x = st
                         st = ''
                 else:
                     st += y
-            #self.data2[i] = st
             self.y = st
             st = ''
         else:
             for y in str(self.operation[i]):
                 st += y
-            #self.data1[i] = st
-            #self.data2[i] = st
             self.x = st
             st = ''
         return [self.x, self.y]
             
     def run(self,i):
-        #for i in range(len(self.operation)):
-            try:
-                #float(self.data1[i])
-                float(self.x)
-            except:
-                #self.data1[i] = self.data1[i]
-                #self.data2[i] = self.data2[i]
-                return [self.x,0]
-            else:
-                #x_scaled = (int(self.data1[i])/1016) - 3 - 2.5
-                #y_scaled = (int(self.data2[i])/1016) + 5.59
-                x_scaled = (int(self.x)/1016) - 3
-                y_scaled = (int(self.y)/1016)
-                r = math.sqrt(x_scaled**2 + y_scaled**2)
-                duty1 = (r*16384)/0.04167
-                duty2 = (16384*r*math.acos(x_scaled/r))/(2*3.14)
-                self.x = duty1
-                self.y = duty2
-                return [self.x,self.y]
+        '''!
+        A generator that scales the data from the previous step in processing
+        to make it applicable to the physical system.
+        @param i A counter that determines the amount of times that the generator ran.
+        @return x Both motor setpoints after this stage of the processing.
+        '''        
+        try:
+            float(self.x)
+        except:
+            return [self.x,0]
+        else:
+            ## The scaled x coordinate that converts the hpgl units to inches.
+            x_scaled = (int(self.x)/1016) - 3
+            ## The scaled y coordinate that converts the hpgl units to inches.
+            y_scaled = (int(self.y)/1016)
+            ## The radius value used for polar coordinates, derived from the scaled variables.
+            r = math.sqrt(x_scaled**2 + y_scaled**2)
+            ## The setpoint of the first motor.
+            setpoint1 = (r*16384)/0.04167
+            ## The setpoint of the second motor.
+            setpoint2 = (16384*r*math.acos(x_scaled/r))/(2*3.14)
+            self.x = setpoint1
+            self.y = setpoint2
+            return [self.x,self.y]
     
-#     def report_x(self,i):
-#         return self.data1[i]
-#     
-#     def report_y(self,i):
-#         return self.data2[i]
     def report_x(self):
+        '''!
+        A function that returns the setpoint of the first motor.
+        @return x The setpoint of motor 1.
+        ''' 
         return self.x
     
     def report_y(self):
+        '''!
+        A function that returns the setpoint of the second motor.
+        @return y The setpoint of motor 2.
+        ''' 
         return self.y
     
     def length(self):
+        '''!
+        A function that returns the length of the operation list.
+        @return length The length of the operation list.
+        ''' 
         return len(self.operation)
-
+    
+# This code creates a driver object then tests the functions of the hpgl class
+# to ensure that it works properly.
 if __name__ == "__main__":
+    ## Driver object for the hpgl class.
     hpgl = hpglDriver()
+    ## Output of the read function.
     operation = hpgl.read('lines.hpgl')
     for i in range(len(operation)):
         hpgl.process(i)
-        uh = hpgl.run(i)
-        print(uh[0],uh[1])
+        ## Output of the run function.
+        x = hpgl.run(i)
+        print(x[0],x[1])

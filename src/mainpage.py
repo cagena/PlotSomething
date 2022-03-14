@@ -18,12 +18,6 @@ The software was designed conceptually in the form of a task diagram and multipl
 @subsection motor Motor Task
 \image html Motor_FSM.png
 
-@subsection cont Controller Task
-\image html Controller_FSM.png
-
-@subsection sol Solenoid Task
-\image html Solenoid_FSM.png
-
 @author Corey Agena
 @author Luisa Chiu
 @date Winter 2022

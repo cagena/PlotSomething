@@ -7,6 +7,7 @@ for each motor. The code was adapted from Dr. Ridgely's basic task example.
 @date 2-9-2022
 """
 
+# Import the required modules.
 import gc
 import pyb
 import cotask
@@ -18,10 +19,7 @@ from pyb import USB_VCP
 from nb_input import NB_Input
 from micropython import const
 import hpgl_agena_chiu
-import math
 import sys
-from array import array
-import utime
 
 ## State 0 of the user interface task
 S0_CALIB            = const(0)
@@ -34,112 +32,77 @@ S3_READ             = const(3)
 ## State 4 of the user interface task
 S4_PLOT             = const(4)
 
-nb_in = NB_Input (USB_VCP(), echo=True)
-
-
-
-# from pyb import USB_VCP
-# from nb_input import NB_Input
-# 
-# nb_in = NB_Input (USB_VCP(), echo=True)
-
-# def input_task ():
-#         """!  Task which runs the non-blocking input object quickly to ensure
-#         that keypresses are handled not long after they've occurred. """
-#         while True:
-#             nb_in.check ()
-#             yield 0
-# 
-# def user_task():
-#      while True:
-#         if nb_in.any ():
-#             if nb_in.get() == 'q':
-#                 print('\r\nThe program was exited')
-#         yield 0
-    
+## Variable representing the input to the serial port.
+nb_in = NB_Input (USB_VCP(), echo=True)   
 
 def task_motor1(duty_cycle = 0):
-    ## The variable that calculates change in time.
-    #difference = 0
-    ## The variable that marks the start of the timer.
-    #start = utime.ticks_ms()
-    ## The variable that indicates if the current run is the initial run of the loop.
-    #runs1 = 0
+    '''!
+    Task which runs the motor, encoder, and controller drivers to 
+    control the duty cycle for motor 1.
+    @param duty_cycle The initial cycle of motor 1.
+    '''
     while True:
-        ## A variable that creates a timer which marks the current time.
-        #current = utime.ticks_ms()
-        #difference = (current - start)
-        #controller_1.set_setpoint(lin_set.get())
-        ## A variable that defines duty cycle for the controller's run function.
+        ## A variable that holds the position of encoder 1.
         enc1 = -encoder_drv1.read()
+        ## A variable that defines duty cycle for the run funciton of controller 1.
         duty_cycle = controller_1.run(enc1, 100)
-        # print(duty_cycle)
         motor_drv1.set_duty_cycle(duty_cycle)
+        ## A flag that indicates that motor 1 reached the desired setpoint within the set limits.
         flag1 = controller_1.flag()
         if flag1 == True:
             move_flag1.put(1)
             flag1 = False
-            #print(move_flag1.get())
-        #print(enc1, lin_set.get())
-        # if enc1 >= lin_set.get() - 100 and enc1 <= lin_set.get() + 100:
-        #     move_flag1.put(1)
-#         if difference <= 1500:
-#             print_task.put('{:},{:}\r\n'.format(difference,encoder_drv1.read()))
-#         else:
-#             if runs1 == 0:
-#                 print_task.put('Done\r\n')
-#                 motor_drv1.disable()
-#                 runs1 = 1
         yield()
 
 def task_motor2(duty_cycle = 0):
-    ## The variable that calculates change in time.
-    # difference = 0
-    ## The variable that marks the start of the timer.
-    # start = utime.ticks_ms()
+    '''!  
+    Task which runs the motor, encoder, and controller drivers to 
+    control the duty cycle for motor 2.
+    @param duty_cycle The initial cycle of motor 2.
+    '''
     while True:
-        ## A variable that creates a timer which marks the current time.
-        # current = utime.ticks_ms()
-        # difference = (current - start)
-        #controller_2.set_setpoint(ang_set.get())
+        ## A variable that holds the position of encoder 2.
         enc2 = -encoder_drv2.read()
-        ## A variable that defines duty cycle for the controller's run function.
+        ## A variable that defines duty cycle for the run funciton of controller 2.
         duty_cycle = controller_2.run(enc2,75)
         motor_drv2.set_duty_cycle(-duty_cycle)
+        ## A flag that indicates that motor 2 reached the desired setpoint within the set limits.
         flag2 = controller_2.flag()
         if flag2 == True:
             move_flag2.put(1)
             flag2 = False
-            #print(move_flag2.get())
-        # if enc2 >= ang_set.get() - 100 and enc2 <= ang_set.get() + 100:
-        #     move_flag2.put(1)
-        # if difference >= 1500:
-        #     motor_drv2.disable()
-        # The print portion is commented out for the second motor.
-            # if difference <= 1500:
-            # print_task.put('{:},{:}\r\n'.format(difference,encoder_drv2.read()))
         yield()
         
 def input_task():
-        """!  Task which runs the non-blocking input object quickly to ensure
-        that keypresses are handled not long after they've occurred. """
-        while True:
-            nb_in.check ()
-            yield ()
+    '''! 
+    Task which runs the non-blocking input object quickly to ensure
+    that keypresses are handled not long after they've occurred.
+    '''
+    while True:
+        nb_in.check ()
+        yield ()
 
-def task_user(state = S0_CALIB, calib_flag = 0):
+def task_user(state = S0_CALIB):
+    '''!  
+    Task which includes multiple states that guide the user through the
+    use of the pen plotter system. This includes: calibration, help, read, and
+    plot states.
+    @param state The initial state of the user task.
+    '''
     while True:
         if state == S0_CALIB:
-            if calib_flag == 0:
-                sol.low()
-                print('\r\nReady to Calibrate? Press c and Enter')
-                calib_flag = 1
+            sol.low()
+            print('\r\nReady to Calibrate? Press c and Enter')
             if nb_in.any ():
+                ## Variable for the character read from the serial port.
                 char_in = nb_in.get()
                 if char_in == 'c':
                     print('\r\nCalibrating')
+                    ## Pin variable for the limit switch.
                     pin = pyb.Pin(pyb.Pin.cpu.A0, pyb.Pin.IN)
+                    ## ADC variable for the pin above.
                     adc = pyb.ADC(pin)
+                    ## Value read from the ADC.
                     val = adc.read()
                     if val > 10:
                         motor_drv1.set_duty_cycle(-100)
@@ -160,17 +123,15 @@ def task_user(state = S0_CALIB, calib_flag = 0):
         elif state == S1_HELP:
             print('\n\rWelcome, press:'
                   '\n\'p\' to plot from a HPGL file'
-    #                   '\n\'d\' to set the both motors to a duty cycle of 0'
-                   '\n\'l\' to prompt the user to enter a setpoint for'
-                   ' lead screw'
-    #                   '\n\'a\' to prompt the user to enter a setpoint for'
-    #                   ' the wheel'
+                  # '\n\'l\' to prompt the user to enter a setpoint for'
+                  # ' lead screw'
                   '\n\'q\' to quit'
                   '\n\'h\' return to the welcome screen')
             state = S2_WAIT_FOR_CHAR
             
         elif state == S2_WAIT_FOR_CHAR:
             if nb_in.any ():
+                ## Variable for the character read from the serial port.
                 char_in = nb_in.get()
                 if char_in == 'q':
                     motor_drv1.set_duty_cycle(0)
@@ -180,23 +141,19 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                 elif char_in == 'h':
                     state = S1_HELP
                     print('\r\n')
-                elif char_in == 'l':
-                    print('\r\nLinear position adjustment')
-                    if nb_in.any():
-                        char_in = nb_in.get()
-                        if char_in == '+':
-                            print('\r\nPositve Linear Motion')
-                            motor_drv1.set_duty_cycle(100)
-                        elif char_in == '-':
-                            print('\r\nNegative Linear Motion')
-                            motor_drv1.set_duty_cycle(-100)
-                        elif char_in == 's':
-                            print('\r\nStopped Motion')
-                            motor_drv1.set_duty_cycle(0)
-                elif char_in == 'a':
-                    print('\r\nAngular position set')
-                elif char_in == 'm' or char_in == 'M':
-                    print('\r\nPosition set')
+                # elif char_in == 'l':
+                #     print('\r\nLinear position adjustment')
+                #     if nb_in.any():
+                #         char_in = nb_in.get()
+                #         if char_in == '+':
+                #             print('\r\nPositve Linear Motion')
+                #             motor_drv1.set_duty_cycle(100)
+                #         elif char_in == '-':
+                #             print('\r\nNegative Linear Motion')
+                #             motor_drv1.set_duty_cycle(-100)
+                #         elif char_in == 's':
+                #             print('\r\nStopped Motion')
+                #             motor_drv1.set_duty_cycle(0)
                 elif char_in == 'p' or char_in == 'P':
                     state = S3_READ
                     i = 0
@@ -205,11 +162,13 @@ def task_user(state = S0_CALIB, calib_flag = 0):
             if i == 0:
                 print('\r\nEnter hpgl file name:')
             elif nb_in.any ():
+                ## Variable holding the file name to be read.
                 filename = nb_in.get()
                 print('\r\n',filename)
                 if '.hpgl' in filename or '.HPGL' in filename:
                     hpgl.read(filename)
                     state = S4_PLOT
+                    ## Counter for the amount of times ran through the plot state.
                     plot_count = 0
                     move_flag1.put(1)
                     move_flag2.put(1)
@@ -226,7 +185,9 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                 move_flag1.put(0)
                 move_flag2.put(0)
                 hpgl.process(plot_count)
+                ## The ouptut from hpgl.run()
                 output = hpgl.run(plot_count)
+                ## The command or number in the 0 position of the output list.
                 x = output[0]
                 try:
                     float(x)
@@ -234,19 +195,17 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                     if x == 'PU':
                         print('ho')
                         sol.low()
-                        #utime.sleep(1)
                         plot_count += 1
                         move_flag1.put(1)
                         move_flag2.put(1)
                     elif x == 'PD':
                         print('he')
                         sol.high()
-                        #utime.sleep(1)
                         plot_count += 1
                         move_flag1.put(1)
                         move_flag2.put(1)
                     elif x == 'IN' and plot_count > 0:
-                        print('quit')
+                        print('Done')
                         state = S1_HELP
                     else:
                         print('hi')
@@ -254,28 +213,18 @@ def task_user(state = S0_CALIB, calib_flag = 0):
                         move_flag2.put(1)
                         plot_count += 1
                 else:
-                    #print('{:},{:}'.format(x,y))
-#                         x_scaled = (int(x)/1016) - 3 - 2.5
-#                         y_scaled = (int(y)/1016) + 5.59
-#                         r = math.sqrt(x_scaled**2 + y_scaled**2)
-#                         duty1 = (r*16384)/0.04167
-#                         duty2 = (16384*20.27*math.acos(x_scaled/r))/2
                     print('uh')
                     if output[1]:
                         print('uhh')
+                        ## The number in the second position of the output list.
                         y = output[1]
-                    #x_int = int(x)
-                    #y_int = int(y)
-                    # lin_set.put(x_int)
-                    # ang_set.put(y_int)
                         controller_1.set_setpoint(x)
                         controller_2.set_setpoint(y)
                         plot_count += 1
         yield ()
 
-# This code creates a share, a queue, and two tasks, then starts the tasks. The
-# tasks run until somebody presses ENTER, at which time the scheduler stops and
-# printouts show diagnostic information about the tasks, share, and queue.
+# This code creates driver and task objects required for the pen ploter.
+# It also runs a task scheduler that allows multitasking.
 if __name__ == "__main__":
     ## A variable that creates a encoder driver for encoder 1.
     encoder_drv1 = encoder_agena_chiu.EncoderDriver(pyb.Pin.cpu.B6, pyb.Pin.cpu.B7, 4)
@@ -293,12 +242,12 @@ if __name__ == "__main__":
     motor_drv1.enable()
     motor_drv2.enable()
     
+    ## A variable that creates a hpgl driver to read the hpgl file.
     hpgl = hpgl_agena_chiu.hpglDriver()
-
-    lin_set = task_share.Share('L', name = 'Linear Setpoint')
-    ang_set = task_share.Share('l', name = 'Angular Setpoint')
     
+    ## A shared variable that indicates that motor 1 arrived at the desired position.
     move_flag1 = task_share.Share('B', name = 'Movement Flag 1')
+    ## A shared variable that indicates that motor 2 arrived at the desired position.
     move_flag2 = task_share.Share('B', name = 'Movement Flag 2')
     
     sol = pyb.Pin(pyb.Pin.cpu.B3, pyb.Pin.OUT_PP)
@@ -306,23 +255,17 @@ if __name__ == "__main__":
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
     gc.collect ()
-
-#     x = input('Input Kp to run step response, input s to stop: ')
-#     try:
-#         float(x)
-#     except:
-#         if x == 's':
-#             motor_drv1.set_duty_cycle(0)
-#             motor_drv2.set_duty_cycle(0)
-#     else:
-    ## A variable that requests for set point from the user.
-#    y = input('Input set point: ')
+    
+    # Set the controller gains and initial setpoints for both motors.
     controller_1.set_gain(0.1)
     controller_1.set_setpoint(0)
     controller_2.set_gain(0.1)
     controller_2.set_setpoint(0)
+    
+    # Set both encoders to zero.
     encoder_drv1.zero()
     encoder_drv2.zero()
+    
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
