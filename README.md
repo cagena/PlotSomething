@@ -1,47 +1,72 @@
-# Term Project Proposal
+# PlotSomething
 
-## Description
+![alt text](System_Overview.jpg)
+Figure 1. System Overview
 
-Our pen plotter project will use a cylindrical axis system, and it involves a radial arm that rotates around a hub and a lead screw that moves the pen 
-radially. One motor will rotate the hub, which will rotate the radial arm, and another motor will rotate the lead screw. The nut in the lead screw 
-will ideally be translating linearly and not rotating. To prevent the pen from rotating, we will incorporate a slider mechanism below the lead screw. 
-We will create a 3-D printed part that acts as the pen carrier, connecting the slider mechanism's moving tab and the lead screw nut. We plan to 3-D 
-print a mount to keep both motors stationed at the origin (which we will define as the top-middle position of the paper). For the radial arm, we will 
-have a drive shaft connected to the rotating hub. The other end of the drive shaft will be connected to a wheel that will assist in the rotation of 
-the radial arm. There will be a 3-D printed support wheel attached to the end of the slider and lead screw combination to prevent system failure 
-from the weight of the components similar to cantilever beam deflection.
+## Introduction
 
-To move the pen vertically, we will be using a solenoid. The solenoid will control the pen's vertical displacement and control whether or not the pen 
-is making contact with the paper. The motors and the solenoid will be controlled using the Nucleo L476 development board and Shoe provided by 
-the ME405 Tub. 
+Our device is a pen plotter system that automatically plots an image through the use of an hpgl file. Through user interface, the 
+user presses p’ to plot, ‘q’ to quit, and ‘h’ to return to the welcome screen. After pressing ‘p’, the user is prompted to enter 
+a hpgl filename. Once that is completed, the device will start to read the hpgl file and plot as the program reads each coordinate. 
+If this filename doesn’t exist in the folder, it will prompt a message that says, “invalid file name”. This device is meant for people 
+who are able to convert their desired image into an hpgl file and for those who want to plot something on paper without having to draw 
+it themselves. This device is also for people who don’t want a typical, boring printed image on a piece of paper.
 
-***NOTE: The solenoid and Sharpie pen are not pictured in the CAD assembly below, but will be incorporated later.
+## Hardware Overview
 
-## Bill of Materials
+The following table displays all of our hardware components used in this project. Fasteners such as screws, bolts, and nuts are not listed.
 
-| Qty. | Part                     | Source                | Est. Cost |
-|:----:|:-------------------------|:----------------------|:---------:|
-|  2   | Pittperson Gearmotors    | ME405 Tub             |     -     |
-|  1   | Nucleo with Shoe         | ME405 Tub             |     -     |
-|  1   | Black  Sharpie&trade;    | Home                  |     -     |
-|  2   | Motor Mount Parts        | Innovation Sandbox    |     -     |
-|  1   | Pen Carrier              | Innovation Sandbox    |     -     |
-|  1   | Support Wheel            | Innovation Sandbox    |     -     |
-|  1   | Solenoid                 | Digikey               |   $4.95   |
-|  1   | T-Slot Framing Extrusion | Mc-Master Carr        |   $2.88   |
-|  1   | Lead Screw               | Home Depot            |   $1.71   |
-|  2   | Bearings                 | Home Depot            |   $8.00   |
-|  1   | Drive Shaft              | Home Depot            |   $8.40   |
-|  2   | Drive Shaft Coupling     | ?                     |     ?     |
-|  1   | Driving Wheel            | ?                     |     ?     |
-|  1   | Main Shaft (at base)     | ?                     |     ?     |
+| Part No.  | Part                              |  Qty. | Source            |
+|:---------:|:---------------------------------:|:------|:-----------------:|
+|    1      | 2-in Drive Wheel                  |   1   | 3-D Printed       |
+|    2      | Track Slider/Solenoid Carrier     |   1   | 3-D Printed       |
+|    3      | Lever Arm/Pen Carrier             |   1   | 3-D Printed       |
+|    4      | Motor Mount                       |   1   | 3-D Printed       |
+|    5      | T-Slot Framing Rail               |   1   | 3-D Printed       | 
+|    6      | Drive Shaft and Lead Screw Mount  |   1   | 3-D Printed       |
+|    7      | Limit Switch Mount                |   1   | 3-D Printed       | 
+|    8      | Metal Base Plate                  |   1   | ME405 Lab         |
+|    9      | Base Shaft                        |   1   | ME405 Lab         |
+|    9      | 3/8 in Drive Shaft                |   1   | Home Depot        |
+|    10     | 3/8 in-24 Threaded Rod            |   1   | McMasterCarr      |
+|    11     | 3/8 in-24 Hex Nut                 |   1   | Home Depot        |
+|    12     | DC Voltage Limit Switch           |   1   | Amazon            |
+|    13     | Solenoid (5V, 1.1A)               |   1   | Amazon            |
+|    14     | Roller Bearing                    |   5   | Amazon            |
+|    15     | Set Screw Shaft Coupling          |   2   | McMasterCarr      |
+|    16     | Black FinePoint Sharpie&trade;    |   1   | Campus Bookstore  |
+|    17     | Rubber Band                       |   2   | Home              |
+|    18     | Nucleo with Shoe	                |   1   | ME405 Tub         |
+|    19     | Mini Breadboard	                |   1   | ME405 Tub         |
+|    20     | MOSFET	                        |   1   | IEEE Campus Store |
+|    21     | 1N4004 Diode	                |   1   | ME405 Tub         |
+|    22     | 5 Ohm Resistor                    |   1   | ME405 Lab         |
+
+Our pen plotter project uses a cylindrical axis system that has one axis of rotation at the base shaft:
+- one drive shaft that rotates using torque from one motor connected to a drive wheel.
+- one lead screw that moves the pen radially using torque from one motor.
+
+The vertical base shaft rotates about the center of axis of rotation by being press-fit into a roller bearing, 
+which was press-fitted into a metal plate that sits on the tabletop.
+
+We 3-D printed a mount to keep both motors stationed close to the base shaft. The two motors are connected 
+to a drive shaft and a lead screw using set screw shaft couplings. Since the motors don’t have enough torque 
+to drive the entire system, we created a larger torque by incorporating a drive wheel. This drive wheel was 
+3-D printed, and a rubber band was wrapped around the diameter of the wheel to provide friction when it contacts 
+the table. The drive wheel was press-fit into the drive shaft, and masking tape was used to create a tighter fit. 
+
+As the lead screw nut undergoes translation motion, we ensured that the lead screw did not rotate by incorporating a 
+slider mechanism. Using a 3-D printed part that acts as a T-Slot framing rail, we 3-D printed a track slider to fit 
+within the slot clearance. We designed this track slider to have the lead screw nut press fitted inside, so as the lead 
+screw rotates, the slider prevents any rotation around the lead screw. We used white masking tape to ensure a tighter 
+press-fit. See figure 2 below for reference.
+
+![alt text](Track_Slider.jpg)
+Figure 2. Close-Up Shot of Track Slider and Lever Arm
 
 
-The last three parts are undetermined at this time because they are either too expensive or we are still looking into other options at this time. 
-We are considering manufacturing these parts in the machine shops.
 
-
-## Scaled Sketches of Proposed System
+## Software Overview
 
 ![alt text](Fixture_1.png)
 Figure 1. Isometric Front View
