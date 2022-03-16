@@ -78,9 +78,9 @@ parts used to set up our solenoid, we followed a circuit diagram provided by Dr.
 Figure 3. Circuit Diagram
 
 The figure above shows a supply voltage of 12 volts, but our solenoid was rated for 5 volts, so we used the lab's power supply 
-to provided 5 volts instead of 12 volts. In addition, we used a 5 ohm resistor instead of a 100 ohm resistor.
+to provide 5 volts instead of 12 volts. In addition, we used a 5 ohm resistor instead of a 100 ohm resistor.
 
-The picture below shows our implementation of the circuit diagram using a MOSFET, 5 ohm resistor, diode, and wires connected 
+The picture below shows our implementation of the circuit diagram using a MOSFET, resistor, diode, and wires connected 
 to the solenoid and power supply.
 
 ![alt text](Circuit_Setup.jpg)
