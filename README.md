@@ -17,7 +17,7 @@ it themselves. This device is also for people who don’t want a typical, boring
 The following table displays all of our hardware components used in this project. Fasteners such as screws, bolts, and nuts are not listed.
 
 | Part No.  | Part                              |  Qty. | Source            |
-|:---------:|----------------------------------:|:-----:|------------------:|
+|:---------:|:----------------------------------|:-----:|:------------------|
 |    1      | 2-in Drive Wheel                  |   1   | 3-D Printed       |
 |    2      | Track Slider/Solenoid Carrier     |   1   | 3-D Printed       |
 |    3      | Lever Arm/Pen Carrier             |   1   | 3-D Printed       |
@@ -43,8 +43,8 @@ The following table displays all of our hardware components used in this project
 |    22     | 5 Ohm Resistor                    |   1   | ME405 Lab         |
 
 Our pen plotter project uses a cylindrical axis system that has one axis of rotation at the base shaft:
-- one drive shaft that rotates using torque from one motor connected to a drive wheel.
-- one lead screw that moves the pen radially using torque from one motor.
+- Theta: one drive shaft that rotates using torque from one motor connected to a drive wheel.
+- Radial: one lead screw that moves the pen radially using torque from one motor.
 
 The vertical base shaft rotates about the center of axis of rotation by being press-fit into a roller bearing, 
 which was press-fitted into a metal plate that sits on the tabletop.
