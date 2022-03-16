@@ -5,12 +5,13 @@ Figure 1. System Overview
 
 ## Introduction
 
-Our device is a pen plotter system that automatically plots an image through the use of an hpgl file. Through user interface, the 
-user presses p’ to plot, ‘q’ to quit, and ‘h’ to return to the welcome screen. After pressing ‘p’, the user is prompted to enter 
-a hpgl filename. Once that is completed, the device will start to read the hpgl file and plot as the program reads each coordinate. 
-If this filename doesn’t exist in the folder, it will prompt a message that says, “invalid file name”. This device is meant for people 
-who are able to convert their desired image into an hpgl file and for those who want to plot something on paper without having to draw 
-it themselves. This device is also for people who don’t want a typical, boring printed image on a piece of paper.
+Our device is a pen plotter system that automatically plots an image through the use of an hpgl file. The user is initially prompted to 
+calibrate the pen. Through a serial terminal window, the user presses p’ to plot, ‘q’ to quit, and ‘h’ to return to the welcome screen. 
+After pressing ‘p’, the user is prompted to enter a hpgl filename. Once that is completed, the device will start to read the hpgl file 
+and plot as the program reads each coordinate. If this filename doesn’t exist in the folder, it will prompt a message that says, 
+“invalid file name”. This device is meant for people who are able to convert their desired image into an hpgl file and for those 
+who want to plot something on paper without having to draw it themselves. This device is also for people who don’t want a typical, 
+boring printed image on a piece of paper.
 
 ## Hardware Overview
 
