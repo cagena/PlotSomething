@@ -5,9 +5,9 @@ Figure 1. System Overview
 
 ## Introduction
 
-Our device is a pen plotter system that automatically plots an image through the use of an hpgl file. The user is initially prompted to 
-calibrate the pen. Through a serial terminal window, the user presses ‘p’ to plot, ‘q’ to quit, and ‘h’ to return to the welcome screen. 
-After pressing ‘p’, the user is prompted to enter a hpgl filename. Once that is completed, the device will start to read the hpgl file 
+Our device is a pen plotter system that automatically plots an image through the use of an hpgl file. Through a serial terminal window, 
+the user is initially prompted to calibrate the pen. Next, the user presses ‘p’ to plot, ‘q’ to quit, and ‘h’ to return to the welcome screen. 
+After pressing ‘p’ to plot, the user is prompted to enter a hpgl filename. Once that is completed, the device will start to read the hpgl file 
 and plot as the program reads each coordinate. If this filename doesn’t exist in the folder, it will prompt a message that says, 
 “invalid file name”. This device is meant for people who are able to convert their desired image into an hpgl file and for those 
 who want to plot something on paper without having to draw it themselves. This device is also for people who don’t want a typical, 
@@ -37,14 +37,10 @@ The following table displays all of our hardware components used in this project
 |    15     | Set Screw Shaft Coupling          |   2   | McMasterCarr      |
 |    16     | Black FinePoint Sharpie&trade;    |   1   | Campus Bookstore  |
 |    17     | Rubber Band                       |   2   | Home              |
-|    18     | Nucleo with Shoe	            |   1   | ME405 Tub         |
-|    19     | Mini Breadboard	                  |   1   | ME405 Tub         |
-|    20     | P40NF03L MOSFET	                  |   1   | IEEE Campus Store |
-|    21     | 1N4004 Diode	                  |   1   | ME405 Tub         |
-|    18     | Nucleo with Shoe	            |   1   | ME405 Tub         |
-|    19     | Mini Breadboard	                  |   1   | ME405 Tub         |
-|    20     | P40NF03L MOSFET	                  |   1   | IEEE Campus Store |
-|    21     | 1N4004 Diode	                  |   1   | ME405 Lab         |
+|    18     | Nucleo with Shoe	                |   1   | ME405 Tub         |
+|    19     | Mini Breadboard	                |   1   | ME405 Tub         |
+|    20     | P40NF03L MOSFET	                |   1   | IEEE Campus Store |
+|    21     | 1N4004 Diode	                |   1   | ME405 Lab         |
 |    22     | 5 Ohm Resistor                    |   1   | ME405 Lab         |
 
 Our pen plotter project uses a cylindrical axis system that has one axis of rotation at the base shaft:
