@@ -109,7 +109,9 @@ If we could make some improvements to our system, we would use the aluminum T-sl
 rail into 3 sections in a different way (so that the track slider did not get caught near the base). Instead of having it split into 3 equal lengths, 
 we would split it up so that the most important middle section was printed in one part, and the end sections were printed separately. In addition, we 
 would figure out a way to implement a second limit switch for the rotation of the drive shaft and drive wheel. This way, we can calibrate our theta value 
-to consistently plot from a selected origin every time our program ran.
+to consistently plot from a selected origin every time our program ran. We would also try to figure out a different design that doesn't use the rubber 
+band as a spring for our lever arm mechanism. If the rubber band is consistently used, the wear and tear of it will prevent the springing action we need 
+to return the lever arm to a horizontal position.
 
 We learned that focusing on hardware and software at the same time was very challenging, since one could not be fully tested without the other. 
 The time constraint of this project ultimately caught up to us, especially since our McMasterCarr part did not come in time. In addition, we found it 
