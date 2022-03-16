@@ -40,7 +40,7 @@ The following table displays all of our hardware components used in this project
 |    18     | Nucleo with Shoe	                |   1   | ME405 Tub         |
 |    19     | Mini Breadboard	                |   1   | ME405 Tub         |
 |    20     | P40NF03L MOSFET	                |   1   | IEEE Campus Store |
-|    21     | 1N4004 Diode	                |   1   | ME405 Tub         |
+|    21     | 1N4004 Diode	                |   1   | ME405 Lab         |
 |    22     | 5 Ohm Resistor                    |   1   | ME405 Lab         |
 
 Our pen plotter project uses a cylindrical axis system that has one axis of rotation at the base shaft:
